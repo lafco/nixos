@@ -1,0 +1,10 @@
+# direnv
+.direnv/
+
+# resultados de builds
+result
+result-*
+
+# editores
+*.swp
+.DS_Store
