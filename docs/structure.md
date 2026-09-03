@@ -13,8 +13,8 @@
 | `modules/nixos/` | Módulos NixOS reutilizáveis: `common.nix` (tudo que é igual em daily e server), `desktop.nix` (XFCE, só daily), `gaming.nix` (Steam/GameMode, só daily), `server.nix` (endurecimento SSH, só server). |
 | `lib/` | Helpers (`default.nix`) e `overlays.nix`: `pkgs.unstable.*` (pi/herdr, do nixpkgs-unstable). |
 | `home/lafco/` | Core do usuário em home-manager. Importa os módulos LOCAIS de `home/modules/` (antes eles vinham do repo de dotfiles, que hoje é só stow + CLI `dot`): `dotfiles.nix` (symlinks), `shell.nix`, `git.nix`, `editor.nix`, `terminal.nix` — mais o `ssh.nix` local. |
-| `home/modules/` | Módulos home-manager do usuário (vendored do antigo `nixos/modules/home/` do repo de dotfiles): `dotfiles.nix` (symlinks para `~/dotfiles`), `shell.nix`, `git.nix`, `editor.nix`, `terminal.nix`, `ai.nix`, `apps.nix`. |
-| `home/profiles/` | Deltas por máquina: `personal.nix` (daily: + `ai.nix`/`apps.nix` de `home/modules`), `work.nix` (empresa: identidade git do trabalho), `server.nix` (servidor: vazio). Importados DEPOIS do core, então sobrescrevem opções. |
+| `home/modules/` | Módulos home-manager do usuário (vendored do antigo `nixos/modules/home/` do repo de dotfiles): `dotfiles.nix` (symlinks para `~/dotfiles`), `shell.nix`, `git.nix`, `editor.nix`, `terminal.nix`, `ai.nix`, `apps.nix`, `xfce.nix` (painel + keybinds do XFCE, XML do xfconf em `home/modules/xfce/`). |
+| `home/profiles/` | Deltas por máquina: `personal.nix` (daily: + `ai.nix`/`apps.nix`/`xfce.nix` de `home/modules`), `work.nix` (empresa: identidade git do trabalho), `server.nix` (servidor: vazio). Importados DEPOIS do core, então sobrescrevem opções. |
 | `secrets/` | `secrets.yaml` encriptado (sops-nix) — commitável; `.example` é só documentação. |
 | `scripts/` | Atalhos: deploy do servidor e ativação na máquina da empresa. |
 | `docs/` | Esta documentação, decisões e bootstrap. |

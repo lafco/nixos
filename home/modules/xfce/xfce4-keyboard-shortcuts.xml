@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Keybinds (formato xfconf do xfce4-keyboard-shortcuts). Só os custom —
+  os defaults do XFCE continuam valendo (schema do xfconf).
+
+  Super+t          terminal
+  Ctrl+Alt+t       terminal (alternativo)
+  Super+f          gerenciador de arquivos (thunar)
+  Super+w          navegador (firefox)
+  Super+l          travar a sessão (xflock4)
+  Super+d          mostrar área de trabalho
+  Print            screenshot (xfce4-screenshooter)
+-->
+<channel name="xfce4-keyboard-shortcuts" version="1.0">
+  <property name="commands" type="empty">
+    <property name="custom" type="empty">
+      <property name="&lt;Super&gt;t" type="string" value="exo-open --launch TerminalEmulator"/>
+      <property name="&lt;Primary&gt;&lt;Alt&gt;t" type="string" value="exo-open --launch TerminalEmulator"/>
+      <property name="&lt;Super&gt;f" type="string" value="exo-open --launch FileManager"/>
+      <property name="&lt;Super&gt;w" type="string" value="exo-open --launch WebBrowser"/>
+      <property name="&lt;Super&gt;l" type="string" value="xflock4"/>
+      <property name="Print" type="string" value="xfce4-screenshooter"/>
+    </property>
+  </property>
+  <property name="xfwm4" type="empty">
+    <property name="custom" type="empty">
+      <property name="&lt;Super&gt;d" type="string" value="show_desktop_key"/>
+    </property>
+  </property>
+</channel>

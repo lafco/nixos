@@ -1,4 +1,5 @@
-# Ambiente gráfico da máquina de uso diário: XFCE + LightDM + PipeWire + fontes.
+# Ambiente gráfico da máquina de uso diário: XFCE + SDDM + PipeWire +
+# Bluetooth + fontes.
 { pkgs, ... }:
 {
   services.xserver = {
@@ -21,6 +22,14 @@
     pulse.enable = true;
   };
 
+  # Bluetooth (fones, controle de jogo etc.). O blueman dá o applet no
+  # systray do painel (o painel em si é configurado em home/modules/xfce).
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+  };
+  services.blueman.enable = true;
+
   # Touchpad/trackpad.
   services.libinput.enable = true;
 
@@ -33,6 +42,7 @@
   # Aplicativos gráficos padrão (adicione os seus aqui).
   environment.systemPackages = with pkgs; [
     firefox
+    xfce4-screenshooter # usado pelo keybind Print (home/modules/xfce)
     # alacritty
     # vlc
   ];
