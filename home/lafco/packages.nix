@@ -14,8 +14,7 @@
   ];
 
   programs.fzf.enable = true;
-  programs.eza.enable = true;
-  programs.eza.enableAliases = true;
+  programs.eza.enable = true; # aliases por shell já vêm habilitados por padrão
   programs.bat.enable = true;
   programs.zoxide.enable = true;
 }

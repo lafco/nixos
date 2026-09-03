@@ -5,11 +5,10 @@
 
   networking.hostName = "server";
 
-  # VPS típico: BIOS + GRUB. Ajuste o device conforme o provedor.
-  boot.loader.grub = {
-    enable = true;
-    devices = [ "/dev/sda" ]; # /dev/vda em KVM/Proxmox, /dev/nvme0n1 em bare metal
-  };
+  # VPS típico: BIOS + GRUB.
+  # O disco NÃO precisa ser listado aqui: a partição EF02 do disko-config.nix
+  # faz o disko preencher boot.loader.grub.devices automaticamente.
+  boot.loader.grub.enable = true;
 
   users.users.lafco = {
     isNormalUser = true;

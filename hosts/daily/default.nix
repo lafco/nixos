@@ -9,6 +9,9 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # zsh como shell de login também no nível do sistema (assertion do NixOS).
+  programs.zsh.enable = true;
+
   users.users.lafco = {
     isNormalUser = true;
     description = "lafco";

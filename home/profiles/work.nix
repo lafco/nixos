@@ -4,13 +4,15 @@
 # do core (ex.: identidade git).
 { pkgs, ... }:
 {
-  programs.git = {
-    userName = "SEU NOME"; # TODO: identidade da empresa
-    userEmail = "voce@empresa.com"; # TODO
-    extraConfig = {
-      # Git "vira" outra identidade dentro de ~/work/ (includeIf ignora
-      # silenciosamente o arquivo se ele não existir):
-      includeIf."gitdir:~/work/".path = "~/.gitconfig-work";
+  programs.git.settings = {
+    user = {
+      name = "SEU NOME"; # TODO: identidade da empresa
+      email = "voce@empresa.com"; # TODO
+    };
+    # Git "vira" outra identidade dentro de ~/work/ (includeIf ignora
+    # silenciosamente o arquivo se ele não existir):
+    includeIf."gitdir:~/work/" = {
+      path = "~/.gitconfig-work";
     };
   };
 

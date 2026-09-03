@@ -4,9 +4,11 @@
 {
   programs.git = {
     enable = true;
-    userName = "lafco"; # TODO: troque
-    userEmail = "lafco@example.com"; # TODO: troque
-    extraConfig = {
+    settings = {
+      user = {
+        name = "lafco"; # TODO: troque
+        email = "lafco@example.com"; # TODO: troque
+      };
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;
@@ -16,13 +18,26 @@
 
   programs.ssh = {
     enable = true;
-    matchBlocks = {
+    enableDefaultConfig = false; # defaults declarados em settings."*" abaixo
+    settings = {
+      "*" = {
+        ForwardAgent = false;
+        AddKeysToAgent = "no";
+        Compression = false;
+        ServerAliveInterval = 0;
+        ServerAliveCountMax = 3;
+        HashKnownHosts = false;
+        UserKnownHostsFile = "~/.ssh/known_hosts";
+        ControlMaster = "no";
+        ControlPath = "~/.ssh/master-%r@%n:%p";
+        ControlPersist = "no";
+      };
       "github.com" = {
-        identityFile = "~/.ssh/id_ed25519";
+        IdentityFile = "~/.ssh/id_ed25519";
       };
       # Chave específica para o git da empresa:
       # "git.empresa.com" = {
-      #   identityFile = "~/.ssh/id_ed25519_work";
+      #   IdentityFile = "~/.ssh/id_ed25519_work";
       # };
     };
   };

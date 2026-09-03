@@ -8,7 +8,8 @@
     # videoDrivers = [ "nvidia" ];
   };
 
-  services.displayManager.lightdm.enable = true;
+  # SDDM como display manager (o LightDM foi removido do nixpkgs em 2025).
+  services.displayManager.sddm.enable = true;
   services.displayManager.defaultSession = "xfce";
 
   networking.networkmanager.enable = true;

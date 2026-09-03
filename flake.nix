@@ -134,7 +134,11 @@
 
       # ── Formatador (`nix fmt`) ─────────────────────────────────────
       formatter = forAllSystems (
-        system: (treefmt-nix.lib.evalConfigBundle (import ./treefmt.nix)).config.build.wrapper
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        treefmt-nix.lib.mkWrapper pkgs (import ./treefmt.nix)
       );
     };
 }

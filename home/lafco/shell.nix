@@ -4,7 +4,7 @@
   programs.zsh = {
     enable = true;
     enableCompletion = true;
-    autosuggestions.enable = true;
+    autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     shellAliases = {
       ls = "eza";
@@ -14,7 +14,7 @@
       g = "git";
       ".." = "cd ..";
     };
-    initExtra = ''
+    initContent = ''
       export PATH="$PATH:$HOME/.local/bin"
     '';
   };
