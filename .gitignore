@@ -8,3 +8,7 @@ result-*
 # editores
 *.swp
 .DS_Store
+
+# configuração local por máquina (gerada pelo install/install-iso.sh)
+hosts/*/local.nix
+hosts/*/local.disko.nix

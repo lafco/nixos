@@ -1,0 +1,109 @@
+# Instalando a partir da ISO minimal (TUI)
+
+O objetivo: baixar a **ISO minimal do NixOS**, bootar, rodar UM comando e
+responder as perguntas na TUI — o resto (flakes, clone do repo,
+hardware-configuration, particionamento e instalação) é automático.
+
+## 1. Disponibilizar o repo (escolha uma)
+
+A ISO precisa alcançar este repo de alguma forma:
+
+- **A. GitHub/GitLab (recomendado):** suba o repo (`git push`) e use a URL
+  pública. É a opção mais simples de manter.
+- **B. Rede local:** na máquina com o repo:
+  ```sh
+  cd ~/dotfiles && git update-server-info && python3 -m http.server 8000
+  ```
+  (serve o repo por HTTP "dumb"; funciona para `git clone` e `curl`.)
+- **C. Pendrive:** copie o repo inteiro para um pendrive e rode o script
+  direto dele na ISO.
+
+## 2. Baixar e bootar a ISO
+
+1. Baixe a [ISO minimal do NixOS 26.05](https://nixos.org/download/#nixos-iso).
+2. Grave num pendrive (ex.: `sudo dd if=nixos.iso of=/dev/sdX bs=4M status=progress`)
+   ou use no Ventoy.
+3. Boote **em modo UEFI** para instalar o host `daily` (BIOS serve apenas para
+   o `server`, cujo layout usa GRUB/BIOS).
+
+## 3. Rodar o instalador
+
+Na ISO (login `nixos`, sem senha):
+
+```sh
+# opção A/B:
+sh <(curl -L <URL-do-script>/install/install-iso.sh)
+
+# opção C:
+sh /media/<pendrive>/install/install-iso.sh
+
+# A/B: se preferir clonar na mão antes:
+git clone <URL-do-repo> ~/dotfiles && cd ~/dotfiles && ./install/install-iso.sh
+```
+
+A TUI pergunta: **host** (daily/server) → **hostname** → **disco** → **usuário**
+→ **senha** → **timezone** (→ chave SSH pública, no caso do server → caminho
+opcional de uma chave age para já deixar o sops-nix pronto).
+
+O script então:
+
+1. habilita `nix-command flakes` no usuário **e** no root (o que a ISO sempre pede);
+2. instala `git` + `gum` via nix;
+3. gera `hosts/<host>/hardware-configuration.nix`
+   (`nixos-generate-config --show-hardware-config --no-filesystems` — sem
+   filesystems porque o **disko é dono deles**);
+4. escreve `hosts/<host>/local.nix` com os overrides da máquina (hostname,
+   timezone, senha **hasheada**, disco em `/dev/disk/by-id/...`, chave SSH) e
+   usa `git add -N -f` (intent-to-add) para o flake enxergá-lo sem o deixar
+   staged — o arquivo fica no `.gitignore`;
+5. roda `disko-install` (`--disk main <by-id> --extra-files <repo> home/<user>/dotfiles`):
+   particiona com o disko, monta, instala o flake e copia o repo para dentro
+   da máquina nova.
+
+> ⚠️ O disco escolhido é **formatado por completo** — sem dual-boot.
+
+## 4. Pós-instalação (primeiro boot)
+
+```sh
+cd ~/dotfiles
+git reset                      # remove os intent-to-add do install
+sudo chown -R lafco: ~/dotfiles  # o repo foi copiado como root
+sudo passwd lafco              # opcional: trocar a senha (ela não será sobrescrita)
+```
+
+Recomendado: **commitar o `hardware-configuration.nix`** gerado (é específico
+da máquina e versionado de propósito):
+
+```sh
+cd ~/dotfiles && git add hosts/<host>/hardware-configuration.nix && git commit -m "hardware: <host>"
+```
+
+O `local.nix` continua ignorado — as escolhas locais não entram no repo
+compartilhado (e `git add -A` nunca o incluirá).
+
+Aplicar mudanças depois: `sudo nixos-rebuild switch --flake ~/dotfiles#daily`.
+
+## 5. Alternativa: instalação remota (nixos-anywhere)
+
+Se a máquina alvo estiver acessível por SSH (ex.: o servidor VPS), em vez de
+bootar a ISO nela você pode instalar a partir de qualquer máquina com Nix:
+
+```sh
+nix run nixpkgs#nixos-anywhere -- \
+  --flake .#server \
+  --generate-hardware-config nixos-generate-config ./hosts/server/hardware-configuration.nix \
+  root@<ip-do-vps>
+```
+
+(Esse fluxo é o recomendado para o VPS: não precisa de ISO nem de BIOS/UEFI.)
+
+## 6. Solução de problemas
+
+| Sintoma | Causa/correção |
+|---|---|
+| `sudo nix ...` reclama de features experimentais | o script escreve `/etc/nix/nix.conf`; se rodar comandos à mão, use `sudo nix --extra-experimental-features 'nix-command flakes' ...` (sudo não herda a config do usuário). |
+| `git: command not found` | a ISO minimal não traz git; o script instala via `nix profile install nixpkgs#git`. |
+| "host 'daily' ... BIOS" | boote a ISO em UEFI (ou ajuste o disko para GRUB). |
+| "host 'server' ... UEFI" | use o fluxo remoto (nixos-anywhere) ou adicione ESP no disko do server. |
+| Clone falha na rede corporativa | configure proxy em `/etc/nix/nix.conf` e use `git config http.proxy`. |
+| Esqueceu a senha | boot da ISO de novo → `disko-install --mode mount --flake .#host --disk main <by-id>` monta sem formatar; ou use `nixos-enter` e `passwd`. |

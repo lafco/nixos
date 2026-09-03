@@ -1,7 +1,12 @@
 # Máquina de USO DIÁRIO — NixOS + XFCE.
 { pkgs, lib, ... }:
 {
-  imports = [ ./hardware-configuration.nix ./disko-config.nix ];
+  # local.nix é opcional e específico da máquina (gerado pelo instalador da
+  # ISO em install/install-iso.sh; não versionado). Sobrescreve hostname,
+  # disco (disko) e usuário/senha locais.
+  imports =
+    [ ./hardware-configuration.nix ./disko-config.nix ]
+    ++ lib.optional (builtins.pathExists ./local.nix) ./local.nix;
 
   networking.hostName = "daily";
 

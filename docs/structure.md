@@ -6,8 +6,10 @@
 |---|---|
 | `flake.nix` | Entrada única. Declara inputs (nixpkgs, home-manager, sops-nix, disko, treefmt) e os três alvos: `nixosConfigurations.daily`, `nixosConfigurations.server`, `homeConfigurations."lafco@work"`. |
 | `hosts/<maquina>/default.nix` | Config específica da máquina NixOS (hostname, usuário, bootloader, segredos). Importa o `hardware-configuration.nix` e o `disko-config.nix` da mesma pasta. |
-| `hosts/<maquina>/hardware-configuration.nix` | GERADO por máquina (drives/rede/firmware). Substitua o stub pelo arquivo real. |
-| `hosts/<maquina>/disko-config.nix` | Layout de disco declarativo (usado pelo nixos-anywhere na instalação). |
+| `hosts/<maquina>/hardware-configuration.nix` | GERADO por máquina (drives/rede/firmware). Substitua o stub pelo arquivo real — o instalador da ISO faz isso por você. |
+| `hosts/<maquina>/disko-config.nix` | Layout de disco declarativo (usado pelo disko-install na instalação). |
+| `hosts/<maquina>/local.nix` | Opcional, por máquina, **no .gitignore**: overrides locais (hostname, disco, senha hasheada) gerados por `install/install-iso.sh`. Fica visível ao flake via `git add -N -f` (intent-to-add), sem nunca ser commitado. |
+| `install/install-iso.sh` | Instalador TUI para a ISO minimal (habilita flakes, clona o repo, pergunta host/disco/usuário, gera hardware-config, chama o disko-install). Veja `docs/install.md`. |
 | `modules/nixos/` | Módulos NixOS reutilizáveis: `common.nix` (tudo que é igual em daily e server), `desktop.nix` (XFCE, só daily), `server.nix` (endurecimento SSH, só server). |
 | `home/lafco/` | Core do usuário em home-manager — um arquivo por programa (shell, git, neovim, tmux, direnv, packages). Igual em TODAS as máquinas. |
 | `home/profiles/` | Deltas por máquina: `personal.nix` (daily), `work.nix` (empresa), `server.nix` (servidor). Importados DEPOIS do core, então sobrescrevem opções. |

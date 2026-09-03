@@ -28,9 +28,10 @@ Configuração declarativa de tudo o que eu uso, em um único repo:
 │   ├── lafco/                #   core compartilhado (shell, git, nvim, tmux…)
 │   └── profiles/             #   personal / work / server
 ├── modules/nixos/            # módulos NixOS reutilizáveis (common, desktop, server)
+├── install/                  # instalador TUI da ISO minimal (install-iso.sh)
 ├── secrets/                  # secrets.yaml encriptado (sops-nix)
 ├── scripts/                  # deploy do servidor e ativação na máquina da empresa
-└── docs/                     # decisões, bootstrap e organização
+└── docs/                     # decisões, bootstrap, instalação e organização
 ```
 
 Explicação detalhada: [`docs/structure.md`](docs/structure.md).
@@ -38,6 +39,9 @@ Explicação detalhada: [`docs/structure.md`](docs/structure.md).
 ## Início rápido
 
 ```sh
+# Instalação nova pela ISO minimal (TUI — escolhe host/disco/usuário):
+sh <(curl -L <url>/install/install-iso.sh)   # veja docs/install.md
+
 # Máquina da empresa (Ubuntu/Debian):
 #   1) instalar Nix  2) ./scripts/install-work.sh
 
@@ -49,7 +53,7 @@ sudo nixos-rebuild switch --flake .#daily
 ```
 
 Passo a passo completo (chaves SSH/age, segredos, instalação do zero):
-[`docs/bootstrap.md`](docs/bootstrap.md).
+[`docs/bootstrap.md`](docs/bootstrap.md) e [`docs/install.md`](docs/install.md).
 
 ## TODO antes do primeiro uso real
 
