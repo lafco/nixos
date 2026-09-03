@@ -15,6 +15,9 @@
     fd
     ripgrep
 
+    # file manager TUI (o thunar continua como GUI no XFCE)
+    xplr
+
     # sistema
     btop
 

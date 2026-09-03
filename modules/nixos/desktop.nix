@@ -42,6 +42,7 @@
   # Aplicativos gráficos padrão (adicione os seus aqui).
   environment.systemPackages = with pkgs; [
     firefox
+    thunar # file manager GUI (já vem com o XFCE; explícito por clareza)
     xfce4-screenshooter # usado pelo keybind Print (home/modules/xfce)
     # alacritty
     # vlc

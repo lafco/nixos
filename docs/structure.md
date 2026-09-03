@@ -10,7 +10,7 @@
 | `hosts/<maquina>/disko-config.nix` | Layout de disco declarativo (usado pelo disko-install na instalação). |
 | `hosts/<maquina>/local.nix` | Opcional, por máquina, **no .gitignore**: overrides locais (hostname, disco, senha hasheada) gerados por `install/install-iso.sh`. Fica visível ao flake via `git add -N -f` (intent-to-add), sem nunca ser commitado. |
 | `install/install-iso.sh` | Instalador TUI para a ISO minimal (habilita flakes, clona o repo, pergunta host/disco/usuário, gera hardware-config, chama o disko-install). Veja `docs/install.md`. |
-| `modules/nixos/` | Módulos NixOS reutilizáveis: `common.nix` (tudo que é igual em daily e server), `desktop.nix` (XFCE, só daily), `gaming.nix` (Steam/GameMode, só daily), `server.nix` (endurecimento SSH, só server). |
+| `modules/nixos/` | Módulos NixOS reutilizáveis: `common.nix` (tudo que é igual em daily e server), `desktop.nix` (XFCE, só daily), `gaming.nix` (Steam/GameMode, só daily), `torrents.nix` (qBittorrent headless + Prowlarr em localhost, só daily), `server.nix` (endurecimento SSH, só server). |
 | `lib/` | Helpers (`default.nix`) e `overlays.nix`: `pkgs.unstable.*` (pi/herdr, do nixpkgs-unstable). |
 | `home/lafco/` | Core do usuário em home-manager. Importa os módulos LOCAIS de `home/modules/` (antes eles vinham do repo de dotfiles, que hoje é só stow + CLI `dot`): `dotfiles.nix` (symlinks), `shell.nix`, `git.nix`, `editor.nix`, `terminal.nix` — mais o `ssh.nix` local. |
 | `home/modules/` | Módulos home-manager do usuário (vendored do antigo `nixos/modules/home/` do repo de dotfiles): `dotfiles.nix` (symlinks para `~/dotfiles`), `shell.nix`, `git.nix`, `editor.nix`, `terminal.nix`, `ai.nix`, `apps.nix`, `xfce.nix` (painel + keybinds do XFCE, XML do xfconf em `home/modules/xfce/`). |
@@ -62,6 +62,7 @@ Se o programa é só da empresa → coloque em `home/profiles/work.nix`.
 - Comum a tudo → `modules/nixos/common.nix`.
 - Só desktop → `modules/nixos/desktop.nix`.
 - Só jogos → `modules/nixos/gaming.nix`.
+- Só torrents → `modules/nixos/torrents.nix`.
 - Só servidor → `modules/nixos/server.nix`.
 - Só uma máquina → direto no `hosts/<maquina>/default.nix`.
 
