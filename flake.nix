@@ -98,7 +98,15 @@
         modules = [
           ./home/lafco
           ./home/profiles/work.nix
-          sops-nix.homeManagerModules.sops
+          # Segredos na máquina do trabalho (opcional): descomente quando for
+          # usar e crie secrets/secrets.yaml primeiro (docs/bootstrap.md).
+          # sops-nix.homeManagerModules.sops
+          # {
+          #   sops = {
+          #     defaultSopsFile = ../../secrets/secrets.yaml;
+          #     age.keyFile = "/home/lafco/.config/sops/age/keys.txt";
+          #   };
+          # }
         ];
         # Se um dia a máquina do trabalho for macOS:
         # modules = modules ++ [ { home.homeDirectory = "/Users/lafco"; } ];

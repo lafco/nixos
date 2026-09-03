@@ -1,5 +1,5 @@
 # Máquina de USO DIÁRIO — NixOS + XFCE.
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   imports = [ ./hardware-configuration.nix ./disko-config.nix ];
 
@@ -25,8 +25,10 @@
     imports = [ ../../home/lafco ../../home/profiles/personal.nix ];
   };
 
-  # Segredos: decriptados pela chave SSH do host (veja docs/bootstrap.md).
-  sops = {
+  # Segredos (sops-nix): só ativa quando secrets/secrets.yaml existir.
+  # Crie o arquivo (docs/bootstrap.md) e rode um rebuild para habilitar.
+  # Decriptação: pela chave SSH do próprio host.
+  sops = lib.mkIf (builtins.pathExists ../../secrets/secrets.yaml) {
     defaultSopsFile = ../../secrets/secrets.yaml;
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
   };
