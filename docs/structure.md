@@ -12,8 +12,9 @@
 | `install/install-iso.sh` | Instalador TUI para a ISO minimal (habilita flakes, clona o repo, pergunta host/disco/usuário, gera hardware-config, chama o disko-install). Veja `docs/install.md`. |
 | `modules/nixos/` | Módulos NixOS reutilizáveis: `common.nix` (tudo que é igual em daily e server), `desktop.nix` (XFCE, só daily), `server.nix` (endurecimento SSH, só server). |
 | `lib/` | Helpers (`default.nix`) e `overlays.nix`: `pkgs.unstable.*` (pi/herdr, do nixpkgs-unstable). |
-| `home/lafco/` | Core do usuário em home-manager. Importa os módulos do repo de dotfiles ([lafco/config](https://github.com/lafco/config), input `dotfiles` do flake): `dotfiles.nix` (symlinks), `shell.nix`, `git.nix`, `editor.nix`, `terminal.nix` — mais o `ssh.nix` local. |
-| `home/profiles/` | Deltas por máquina: `personal.nix` (daily: + apps/ai do repo de dotfiles), `work.nix` (empresa: identidade git do trabalho), `server.nix` (servidor: vazio). Importados DEPOIS do core, então sobrescrevem opções. |
+| `home/lafco/` | Core do usuário em home-manager. Importa os módulos LOCAIS de `home/modules/` (antes eles vinham do repo de dotfiles, que hoje é só stow + CLI `dot`): `dotfiles.nix` (symlinks), `shell.nix`, `git.nix`, `editor.nix`, `terminal.nix` — mais o `ssh.nix` local. |
+| `home/modules/` | Módulos home-manager do usuário (vendored do antigo `nixos/modules/home/` do repo de dotfiles): `dotfiles.nix` (symlinks para `~/dotfiles`), `shell.nix`, `git.nix`, `editor.nix`, `terminal.nix`, `ai.nix`, `apps.nix`. |
+| `home/profiles/` | Deltas por máquina: `personal.nix` (daily: + `ai.nix`/`apps.nix` de `home/modules`), `work.nix` (empresa: identidade git do trabalho), `server.nix` (servidor: vazio). Importados DEPOIS do core, então sobrescrevem opções. |
 | `secrets/` | `secrets.yaml` encriptado (sops-nix) — commitável; `.example` é só documentação. |
 | `scripts/` | Atalhos: deploy do servidor e ativação na máquina da empresa. |
 | `docs/` | Esta documentação, decisões e bootstrap. |
@@ -21,7 +22,7 @@
 ## Como a separação funciona
 
 ```
-                 home/lafco (core: shell, git, nvim, tmux, direnv, packages)
+                 home/lafco (core: symlinks dotfiles, shell, git, editor, terminal)
                         │
       ┌─────────────────┼──────────────────┐
       │                 │                  │
@@ -42,8 +43,8 @@
 
 ### Adicionar um programa do usuário
 
-1. Crie `home/lafco/<programa>.nix` (ex.: `programs.gh.enable = true;`).
-2. Importe em `home/lafco/default.nix`.
+1. Crie `home/modules/<programa>.nix` (ex.: `programs.gh.enable = true;`).
+2. Importe em `home/lafco/default.nix` (todos) ou no perfil certo.
 3. `nix fmt` e rebuild da máquina.
 
 Se o programa é só da empresa → coloque em `home/profiles/work.nix`.

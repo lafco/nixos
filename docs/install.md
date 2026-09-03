@@ -59,8 +59,9 @@ O script então:
 5. clona o repo de dotfiles (`github:lafco/config`) e roda `disko-install`
    (`--disk main <by-id> --extra-files ...`): particiona com o disko, monta,
    instala o flake e copia os dois repos para dentro da máquina nova:
-   **este repo → `~/nixos`** e **dotfiles → `~/dotfiles`** (o `home/lafco`
-   symlinka os dotfiles de lá — single source of truth).
+   **este repo → `~/nixos`** e **dotfiles → `~/dotfiles`** (o
+   `home/modules/dotfiles.nix` symlinka os dotfiles de lá — single source
+   of truth).
 
 > ⚠️ O disco escolhido é **formatado por completo** — sem dual-boot.
 

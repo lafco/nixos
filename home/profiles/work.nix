@@ -1,7 +1,7 @@
 # Perfil da MÁQUINA DA EMPRESA (home-manager standalone em Ubuntu/Debian).
 #
 # É importado DEPOIS de home/lafco, então as opções daqui sobrescrevem as
-# do core (mkForce vence a identidade git definida pelo repo de dotfiles).
+# do core (mkForce vence a identidade git definida em home/modules/git.nix).
 { pkgs, lib, ... }:
 {
   programs.git.settings = {

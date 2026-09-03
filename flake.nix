@@ -1,5 +1,5 @@
 {
-  description = "Config declarativa: NixOS daily (XFCE), servidor headless e dotfiles para a máquina da empresa";
+  description = "Config declarativa: NixOS daily (XFCE), servidor headless e home-manager para a máquina da empresa (dotfiles em lafco/config)";
 
   inputs = {
     # NixOS estável 26.05
@@ -9,13 +9,9 @@
     # usados via pkgs.unstable.* (ver lib/overlays.nix).
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
-    # Repo de dotfiles (stow + módulos home-manager) — single source of truth
-    # do usuário; o home/lafco importa os módulos daqui e o dotfiles.nix
-    # symlinka ~/dotfiles (clone deste repo) para o home.
-    dotfiles = {
-      url = "github:lafco/config";
-      flake = false; # não é um flake — usamos só como fonte de módulos/arquivos
-    };
+    # Obs.: o repo de dotfiles (github:lafco/config, stow + CLI `dot`) NÃO é
+    # mais um input — ele é clonado em ~/dotfiles pelo instalador e os
+    # symlinks são feitos por home/modules/dotfiles.nix.
 
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
@@ -72,7 +68,8 @@
       hmSystem = {
         home-manager.useGlobalPkgs = true;
         home-manager.useUserPackages = true;
-        # os módulos do repo de dotfiles usam `inputs` (dotfiles, unstable…)
+        # Deixa os inputs disponíveis para os módulos home-manager
+        # (ex.: home/modules usa pkgs.unstable.*, vindo do overlay).
         home-manager.extraSpecialArgs = { inherit inputs; };
       };
     in

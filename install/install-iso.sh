@@ -151,8 +151,8 @@ else
 fi
 
 say "Instalando (disko-install — pode demorar)"
-# Este repo → ~/nixos; o repo de dotfiles → ~/dotfiles (o home/lafco symlinka
-# os dotfiles de lá — single source of truth).
+# Este repo → ~/nixos; o repo de dotfiles → ~/dotfiles (o home-module
+# dotfiles.nix symlinka os dotfiles de lá — single source of truth).
 INSTALL_ARGS=(
   --flake ".#$HOST"
   --disk main "$DISK_BY_ID"

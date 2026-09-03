@@ -20,22 +20,6 @@
         "type": "github"
       }
     },
-    "dotfiles": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1788467204,
-        "narHash": "sha256-QtANEFaS20P86qiF3GNMvQhWBGpcg8rs32RBNUWMExM=",
-        "owner": "lafco",
-        "repo": "config",
-        "rev": "eb68648fd163ad00029d69919804db3253e4bdb9",
-        "type": "github"
-      },
-      "original": {
-        "owner": "lafco",
-        "repo": "config",
-        "type": "github"
-      }
-    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -92,7 +76,6 @@
     "root": {
       "inputs": {
         "disko": "disko",
-        "dotfiles": "dotfiles",
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs",
         "nixpkgs-unstable": "nixpkgs-unstable",

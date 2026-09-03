@@ -1,11 +1,11 @@
 # Perfil PESSOAL — usado na máquina de uso diário (NixOS "daily").
-# Adiciona os módulos "pesados"/de desktop do repo de dotfiles
-# (apps gráficos + agentes de IA) que não fazem sentido nas outras máquinas.
-{ inputs, pkgs, ... }:
+# Adiciona os módulos "pesados"/de desktop (apps gráficos + agentes de IA)
+# que não fazem sentido nas outras máquinas.
+{ pkgs, ... }:
 {
   imports = [
-    (inputs.dotfiles + "/nixos/modules/home/ai.nix")
-    (inputs.dotfiles + "/nixos/modules/home/apps.nix")
+    ../modules/ai.nix
+    ../modules/apps.nix
   ];
 
   home.packages = with pkgs; [

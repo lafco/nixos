@@ -22,7 +22,7 @@ age-keygen -o ~/.config/sops/age/keys.txt
 sh <(curl -L https://nixos.org/nix/install) --daemon
 
 # 2. Clonar os DOIS repos:
-#    - dotfiles (o home/lafco symlinka ~/dotfiles — obrigatório)
+#    - dotfiles (o home/modules/dotfiles.nix symlinka ~/dotfiles — obrigatório)
 #    - este repo (nixos), em qualquer lugar (ex.: ~/nixos)
 git clone https://github.com/lafco/config ~/dotfiles
 git clone https://github.com/lafco/nixos ~/nixos

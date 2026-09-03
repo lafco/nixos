@@ -1,18 +1,19 @@
-# Core compartilhado do usuário — usa os módulos home-manager do repo de
-# dotfiles (github:lafco/config), mantendo ~/dotfiles como single source of
-# truth (o dotfiles.nix de lá cria symlinks para ~/dotfiles/...).
+# Core compartilhado do usuário — módulos home-manager LOCAIS (home/modules),
+# com os arquivos de configuração vindos do repo de dotfiles
+# (github:lafco/config) via symlinks — single source of truth em ~/dotfiles
+# (home/modules/dotfiles.nix).
 #
 # Importante: este core espera que o repo de dotfiles esteja clonado em
 # ~/dotfiles — o instalador da ISO faz isso automaticamente; em outras
 # máquinas: git clone https://github.com/lafco/config ~/dotfiles
-{ inputs, ... }:
+{ ... }:
 {
   imports = [
-    (inputs.dotfiles + "/nixos/modules/home/dotfiles.nix")
-    (inputs.dotfiles + "/nixos/modules/home/shell.nix")
-    (inputs.dotfiles + "/nixos/modules/home/git.nix")
-    (inputs.dotfiles + "/nixos/modules/home/editor.nix")
-    (inputs.dotfiles + "/nixos/modules/home/terminal.nix")
+    ../modules/dotfiles.nix
+    ../modules/shell.nix
+    ../modules/git.nix
+    ../modules/editor.nix
+    ../modules/terminal.nix
     ./ssh.nix
   ];
 

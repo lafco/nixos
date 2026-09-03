@@ -10,8 +10,10 @@ Configuração declarativa de tudo o que eu uso, em um único repo:
 
 **Dotfiles**: os arquivos do usuário (bash, nvim, wezterm, zellij, starship…)
 vivem no repo [lafco/config](https://github.com/lafco/config), clonado em
-`~/dotfiles`. O `home/lafco` importa os módulos home-manager de lá e cria
-symlinks — **editar em `~/dotfiles` tem efeito imediato**, sem rebuild.
+`~/dotfiles`. Os módulos home-manager que os consomem moram AQUI em
+`home/modules/` (o repo de dotfiles virou só stow + CLI `dot`), e o
+`home/modules/dotfiles.nix` cria os symlinks — **editar em `~/dotfiles` tem
+efeito imediato**, sem rebuild.
 
 ## Decisão principal (resumo)
 
@@ -30,7 +32,9 @@ symlinks — **editar em `~/dotfiles` tem efeito imediato**, sem rebuild.
 │   ├── daily/                #   desktop XFCE
 │   └── server/               #   servidor headless
 ├── home/                     # configuração do usuário (home-manager)
-│   ├── lafco/                #   importa os módulos do repo de dotfiles (lafco/config)
+│   ├── lafco/                #   core do usuário (importa home/modules/)
+│   ├── modules/              #   módulos HM: dotfiles (symlinks), shell, git,
+│   │                         #   editor, terminal, ai, apps
 │   └── profiles/             #   personal / work / server
 ├── modules/nixos/            # módulos NixOS reutilizáveis (common, desktop, server)
 ├── install/                  # instalador TUI da ISO minimal (install-iso.sh)
@@ -62,7 +66,7 @@ Passo a passo completo (chaves SSH/age, segredos, instalação do zero):
 
 ## TODO antes do primeiro uso real
 
-- [ ] Trocar identidade git em `home/lafco/git.nix` e `home/profiles/work.nix`
+- [ ] Trocar identidade git em `home/modules/git.nix` e `home/profiles/work.nix`
 - [ ] Gerar `hosts/*/hardware-configuration.nix` nas máquinas reais
 - [ ] Configurar chaves em `.sops.yaml` e criar `secrets/secrets.yaml`
 - [ ] Colar sua chave SSH pública em `hosts/server/default.nix`
