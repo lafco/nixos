@@ -82,6 +82,7 @@
           ./hosts/daily
           ./modules/nixos/common.nix
           ./modules/nixos/desktop.nix
+          ./modules/nixos/gaming.nix
           disko.nixosModules.disko
           sops-nix.nixosModules.sops
           home-manager.nixosModules.home-manager

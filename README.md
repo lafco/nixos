@@ -36,7 +36,7 @@ efeito imediato**, sem rebuild.
 │   ├── modules/              #   módulos HM: dotfiles (symlinks), shell, git,
 │   │                         #   editor, terminal, ai, apps
 │   └── profiles/             #   personal / work / server
-├── modules/nixos/            # módulos NixOS reutilizáveis (common, desktop, server)
+├── modules/nixos/            # módulos NixOS reutilizáveis (common, desktop, gaming, server)
 ├── install/                  # instalador TUI da ISO minimal (install-iso.sh)
 ├── secrets/                  # secrets.yaml encriptado (sops-nix)
 ├── scripts/                  # deploy do servidor e ativação na máquina da empresa
