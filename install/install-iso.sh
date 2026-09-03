@@ -141,8 +141,24 @@ HASH=$(nix shell nixpkgs#mkpasswd --command mkpasswd -m sha-512 "$PASS1")
 git add -N -f "hosts/$HOST/local.nix"
 
 # ── 7. instalação (formata com disko, monta e roda nixos-install) ─────────
+say "Baixando o repo de dotfiles (lafco/config) para ~/dotfiles"
+DOTFILES_URL="${DOTFILES_URL:-https://github.com/lafco/config}"
+DOTFILES_DIR=/tmp/lafco-config
+if [ -d "$DOTFILES_DIR/.git" ]; then
+  git -C "$DOTFILES_DIR" pull --ff-only
+else
+  git clone --depth 1 "$DOTFILES_URL" "$DOTFILES_DIR"
+fi
+
 say "Instalando (disko-install — pode demorar)"
-INSTALL_ARGS=(--flake ".#$HOST" --disk main "$DISK_BY_ID" --extra-files "$REPO_DIR" "home/$USERNAME/dotfiles")
+# Este repo → ~/nixos; o repo de dotfiles → ~/dotfiles (o home/lafco symlinka
+# os dotfiles de lá — single source of truth).
+INSTALL_ARGS=(
+  --flake ".#$HOST"
+  --disk main "$DISK_BY_ID"
+  --extra-files "$REPO_DIR" "home/$USERNAME/nixos"
+  --extra-files "$DOTFILES_DIR" "home/$USERNAME/dotfiles"
+)
 [ "$HOST" = "daily" ] && INSTALL_ARGS+=(--write-efi-boot-entries)
 if [ -n "$AGEKEY" ] && [ -f "$AGEKEY" ]; then
   INSTALL_ARGS+=(--extra-files "$AGEKEY" "home/$USERNAME/.config/sops/age/keys.txt")
@@ -153,8 +169,9 @@ sudo nix run 'github:nix-community/disko/latest#disko-install' -- "${INSTALL_ARG
 gum style --foreground 212 --bold \
   "Instalação concluída! ✓" \
   "" \
-  "Após o primeiro boot, ajuste as permissões do repo copiado:" \
-  "  cd ~/dotfiles && git reset && sudo chown -R $USERNAME: ~/dotfiles" \
+  "Após o primeiro boot, ajuste as permissões dos repos copiados:" \
+  "  cd ~/nixos && git reset && sudo chown -R $USERNAME: ~/nixos ~/dotfiles" \
   "" \
-  "Para aplicar mudanças depois: sudo nixos-rebuild switch --flake ~/dotfiles#$HOST"
+  "Dotfiles: ~/dotfiles (github:lafco/config) — edits têm efeito imediato." \
+  "Para aplicar mudanças depois: sudo nixos-rebuild switch --flake ~/nixos#$HOST"
 gum confirm "Reiniciar agora?" && sudo reboot

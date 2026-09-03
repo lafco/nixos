@@ -56,32 +56,40 @@ O script então:
    timezone, senha **hasheada**, disco em `/dev/disk/by-id/...`, chave SSH) e
    usa `git add -N -f` (intent-to-add) para o flake enxergá-lo sem o deixar
    staged — o arquivo fica no `.gitignore`;
-5. roda `disko-install` (`--disk main <by-id> --extra-files <repo> home/<user>/dotfiles`):
-   particiona com o disko, monta, instala o flake e copia o repo para dentro
-   da máquina nova.
+5. clona o repo de dotfiles (`github:lafco/config`) e roda `disko-install`
+   (`--disk main <by-id> --extra-files ...`): particiona com o disko, monta,
+   instala o flake e copia os dois repos para dentro da máquina nova:
+   **este repo → `~/nixos`** e **dotfiles → `~/dotfiles`** (o `home/lafco`
+   symlinka os dotfiles de lá — single source of truth).
 
 > ⚠️ O disco escolhido é **formatado por completo** — sem dual-boot.
 
 ## 4. Pós-instalação (primeiro boot)
 
 ```sh
-cd ~/dotfiles
-git reset                      # remove os intent-to-add do install
-sudo chown -R lafco: ~/dotfiles  # o repo foi copiado como root
-sudo passwd lafco              # opcional: trocar a senha (ela não será sobrescrita)
+cd ~/nixos
+git reset                        # remove os intent-to-add do install
+sudo chown -R lafco: ~/nixos ~/dotfiles   # os repos foram copiados como root
+sudo passwd lafco                # opcional: trocar a senha (ela não será sobrescrita)
 ```
 
 Recomendado: **commitar o `hardware-configuration.nix`** gerado (é específico
 da máquina e versionado de propósito):
 
 ```sh
-cd ~/dotfiles && git add hosts/<host>/hardware-configuration.nix && git commit -m "hardware: <host>"
+cd ~/nixos && git add hosts/<host>/hardware-configuration.nix && git commit -m "hardware: <host>"
 ```
 
 O `local.nix` continua ignorado — as escolhas locais não entram no repo
 compartilhado (e `git add -A` nunca o incluirá).
 
-Aplicar mudanças depois: `sudo nixos-rebuild switch --flake ~/dotfiles#daily`.
+Os dois repos têm papéis distintos:
+
+- **`~/nixos`** (este repo): sistema + home-manager. Aplicar mudanças:
+  `sudo nixos-rebuild switch --flake ~/nixos#daily`.
+- **`~/dotfiles`** (`github:lafco/config`): os dotfiles em si (bash, nvim,
+  wezterm, zellij, starship…). **Editar aqui tem efeito imediato** (sem
+  rebuild) — o home-manager cria symlinks para `~/dotfiles`.
 
 ## 5. Alternativa: instalação remota (nixos-anywhere)
 

@@ -8,6 +8,11 @@ Configuração declarativa de tudo o que eu uso, em um único repo:
 | **server** — servidor SSH mínimo p/ dev | NixOS headless | `nixosConfigurations.server` (home-manager em modo módulo) |
 | **work** — máquina da empresa | Ubuntu/Debian (SO da empresa) | `homeConfigurations."lafco@work"` (home-manager standalone) |
 
+**Dotfiles**: os arquivos do usuário (bash, nvim, wezterm, zellij, starship…)
+vivem no repo [lafco/config](https://github.com/lafco/config), clonado em
+`~/dotfiles`. O `home/lafco` importa os módulos home-manager de lá e cria
+symlinks — **editar em `~/dotfiles` tem efeito imediato**, sem rebuild.
+
 ## Decisão principal (resumo)
 
 - **Implementação:** Nix oficial (CppNix 2.34 / NixOS 26.05) — mais estável e documentado.
@@ -25,7 +30,7 @@ Configuração declarativa de tudo o que eu uso, em um único repo:
 │   ├── daily/                #   desktop XFCE
 │   └── server/               #   servidor headless
 ├── home/                     # configuração do usuário (home-manager)
-│   ├── lafco/                #   core compartilhado (shell, git, nvim, tmux…)
+│   ├── lafco/                #   importa os módulos do repo de dotfiles (lafco/config)
 │   └── profiles/             #   personal / work / server
 ├── modules/nixos/            # módulos NixOS reutilizáveis (common, desktop, server)
 ├── install/                  # instalador TUI da ISO minimal (install-iso.sh)

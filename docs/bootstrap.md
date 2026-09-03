@@ -21,13 +21,20 @@ age-keygen -o ~/.config/sops/age/keys.txt
 # 1. Instalar Nix (multi-user; pede sudo). Alternativas: Lix/Determinate — docs/decisions.md.
 sh <(curl -L https://nixos.org/nix/install) --daemon
 
-# 2. Clonar este repo e ativar os dotfiles
-git clone <este-repo> ~/dotfiles && cd ~/dotfiles
-./scripts/install-work.sh          # = home-manager switch --flake .#lafco@work
+# 2. Clonar os DOIS repos:
+#    - dotfiles (o home/lafco symlinka ~/dotfiles — obrigatório)
+#    - este repo (nixos), em qualquer lugar (ex.: ~/nixos)
+git clone https://github.com/lafco/config ~/dotfiles
+git clone https://github.com/lafco/nixos ~/nixos
+
+# 3. Ativar os dotfiles
+cd ~/nixos && ./scripts/install-work.sh   # = home-manager switch --flake .#lafco@work
 ```
 
-- Atualizar depois: `git pull && home-manager switch --flake .#lafco@work`
+- Atualizar depois: `cd ~/nixos && git pull && home-manager switch --flake .#lafco@work`
   (ou `nix flake update` antes, se quiser bump de versões).
+- Os dotfiles em `~/dotfiles` têm efeito imediato (symlinks) — edite lá sem
+  rebuild; só packages/opções novas exigem `switch`.
 - Rollback: `home-manager generations` e ativar uma anterior.
 - Em rede corporativa com proxy: o daemon não herda o proxy do shell — configure
   `proxy`/`netrc-file` em `/etc/nix/nix.conf` (issue conhecido:

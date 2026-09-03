@@ -1,21 +1,7 @@
-# Git: identidade pessoal padrão (a identidade do trabalho é sobrescrita
-# em home/profiles/work.nix).
+# SSH: defaults explícitos + identidades.
+# (O repo de dotfiles não declara SSH; fica aqui no nixos-repo.)
 { ... }:
 {
-  programs.git = {
-    enable = true;
-    settings = {
-      user = {
-        name = "lafco"; # TODO: troque
-        email = "lafco@example.com"; # TODO: troque
-      };
-      init.defaultBranch = "main";
-      pull.rebase = true;
-      push.autoSetupRemote = true;
-      core.editor = "nvim";
-    };
-  };
-
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false; # defaults declarados em settings."*" abaixo

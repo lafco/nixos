@@ -5,8 +5,17 @@
     # NixOS estável 26.05
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
-    # (Opcional) nixpkgs instável para pacotes pontuais mais novos:
-    # nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    # Para pacotes que ainda não chegaram no estável (pi-coding-agent, herdr) —
+    # usados via pkgs.unstable.* (ver lib/overlays.nix).
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+
+    # Repo de dotfiles (stow + módulos home-manager) — single source of truth
+    # do usuário; o home/lafco importa os módulos daqui e o dotfiles.nix
+    # symlinka ~/dotfiles (clone deste repo) para o home.
+    dotfiles = {
+      url = "github:lafco/config";
+      flake = false; # não é um flake — usamos só como fonte de módulos/arquivos
+    };
 
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
@@ -56,16 +65,22 @@
       lib = import ./lib;
       inherit (lib) forAllSystems;
 
+      # Overlays compartilhados (unstable + compat nodePackages/intelephense).
+      overlays = import ./lib/overlays.nix { inherit inputs; };
+
       # Liga o home-manager (modo módulo) ao nixpkgs do sistema.
       hmSystem = {
         home-manager.useGlobalPkgs = true;
         home-manager.useUserPackages = true;
+        # os módulos do repo de dotfiles usam `inputs` (dotfiles, unstable…)
+        home-manager.extraSpecialArgs = { inherit inputs; };
       };
     in
     {
       # ── Máquina de uso diário (NixOS + XFCE) ───────────────────────
       nixosConfigurations.daily = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
+        specialArgs = { inherit inputs; };
         modules = [
           ./hosts/daily
           ./modules/nixos/common.nix
@@ -80,6 +95,7 @@
       # ── Servidor headless mínimo para desenvolvimento ──────────────
       nixosConfigurations.server = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
+        specialArgs = { inherit inputs; };
         modules = [
           ./hosts/server
           ./modules/nixos/common.nix
@@ -94,7 +110,12 @@
       # ── Máquina da empresa: home-manager STANDALONE (Ubuntu/Debian) ─
       # Ativação: home-manager switch --flake .#lafco@work
       homeConfigurations."lafco@work" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        pkgs = import nixpkgs {
+          system = "x86_64-linux";
+          config.allowUnfree = true;
+          inherit overlays;
+        };
+        extraSpecialArgs = { inherit inputs; };
         modules = [
           ./home/lafco
           ./home/profiles/work.nix

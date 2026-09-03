@@ -14,9 +14,7 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # zsh como shell de login também no nível do sistema (assertion do NixOS).
-  programs.zsh.enable = true;
-
+  # Shell de login: bash (o bashrc vem do repo de dotfiles em ~/dotfiles).
   users.users.lafco = {
     isNormalUser = true;
     description = "lafco";
@@ -24,7 +22,7 @@
       "wheel"
       "networkmanager"
     ];
-    shell = pkgs.zsh; # zsh vem do home-manager
+    shell = pkgs.bash;
     initialPassword = "changeme"; # troque no primeiro login (passwd)
   };
 

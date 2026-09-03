@@ -1,13 +1,13 @@
 # Perfil da MÁQUINA DA EMPRESA (home-manager standalone em Ubuntu/Debian).
 #
 # É importado DEPOIS de home/lafco, então as opções daqui sobrescrevem as
-# do core (ex.: identidade git).
-{ pkgs, ... }:
+# do core (mkForce vence a identidade git definida pelo repo de dotfiles).
+{ pkgs, lib, ... }:
 {
   programs.git.settings = {
     user = {
-      name = "SEU NOME"; # TODO: identidade da empresa
-      email = "voce@empresa.com"; # TODO
+      name = lib.mkForce "SEU NOME"; # TODO: identidade da empresa
+      email = lib.mkForce "voce@empresa.com"; # TODO
     };
     # Git "vira" outra identidade dentro de ~/work/ (includeIf ignora
     # silenciosamente o arquivo se ele não existir):

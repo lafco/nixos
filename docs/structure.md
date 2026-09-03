@@ -11,8 +11,9 @@
 | `hosts/<maquina>/local.nix` | Opcional, por máquina, **no .gitignore**: overrides locais (hostname, disco, senha hasheada) gerados por `install/install-iso.sh`. Fica visível ao flake via `git add -N -f` (intent-to-add), sem nunca ser commitado. |
 | `install/install-iso.sh` | Instalador TUI para a ISO minimal (habilita flakes, clona o repo, pergunta host/disco/usuário, gera hardware-config, chama o disko-install). Veja `docs/install.md`. |
 | `modules/nixos/` | Módulos NixOS reutilizáveis: `common.nix` (tudo que é igual em daily e server), `desktop.nix` (XFCE, só daily), `server.nix` (endurecimento SSH, só server). |
-| `home/lafco/` | Core do usuário em home-manager — um arquivo por programa (shell, git, neovim, tmux, direnv, packages). Igual em TODAS as máquinas. |
-| `home/profiles/` | Deltas por máquina: `personal.nix` (daily), `work.nix` (empresa), `server.nix` (servidor). Importados DEPOIS do core, então sobrescrevem opções. |
+| `lib/` | Helpers (`default.nix`) e `overlays.nix`: `pkgs.unstable.*` (pi/herdr) + shim `nodePackages.intelephense` (o `nodePackages` foi removido do nixpkgs em 2026; remove o shim quando o repo de dotfiles atualizar). |
+| `home/lafco/` | Core do usuário em home-manager. Importa os módulos do repo de dotfiles ([lafco/config](https://github.com/lafco/config), input `dotfiles` do flake): `dotfiles.nix` (symlinks), `shell.nix`, `git.nix`, `editor.nix`, `terminal.nix` — mais o `ssh.nix` local. |
+| `home/profiles/` | Deltas por máquina: `personal.nix` (daily: + apps/ai do repo de dotfiles), `work.nix` (empresa: identidade git do trabalho), `server.nix` (servidor: vazio). Importados DEPOIS do core, então sobrescrevem opções. |
 | `secrets/` | `secrets.yaml` encriptado (sops-nix) — commitável; `.example` é só documentação. |
 | `scripts/` | Atalhos: deploy do servidor e ativação na máquina da empresa. |
 | `docs/` | Esta documentação, decisões e bootstrap. |

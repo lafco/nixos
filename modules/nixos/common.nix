@@ -1,6 +1,13 @@
 # Base comum a TODAS as máquinas NixOS (daily e server).
-{ pkgs, ... }:
+{ inputs, pkgs, ... }:
 {
+  # Overlays compartilhados (pkgs.unstable.* + compat nodePackages/intelephense)
+  # — definidos em lib/overlays.nix.
+  nixpkgs.overlays = import ../../lib/overlays.nix { inherit inputs; };
+
+  # obsidian/ankama-launcher (apps do repo de dotfiles) são unfree.
+  nixpkgs.config.allowUnfree = true;
+
   # Necessário para usar este repo (flakes).
   nix.settings = {
     experimental-features = [ "nix-command" "flakes" ];
