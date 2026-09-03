@@ -34,9 +34,10 @@ efeito imediato**, sem rebuild.
 ├── home/                     # configuração do usuário (home-manager)
 │   ├── lafco/                #   core do usuário (importa home/modules/)
 │   ├── modules/              #   módulos HM: dotfiles (symlinks), shell, git,
-│   │                         #   editor, terminal, ai, apps, xfce (painel/keybinds)
+│   │                         #   editor, terminal, dev (runtimes), ai, apps,
+│   │                         #   xfce (painel/keybinds)
 │   └── profiles/             #   personal / work / server
-├── modules/nixos/            # módulos NixOS reutilizáveis (common, desktop, gaming, torrents, server)
+├── modules/nixos/            # módulos NixOS reutilizáveis (common, desktop, gaming, torrents, database, server)
 ├── install/                  # instalador TUI da ISO minimal (install-iso.sh)
 ├── secrets/                  # secrets.yaml encriptado (sops-nix)
 ├── scripts/                  # deploy do servidor e ativação na máquina da empresa

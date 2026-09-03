@@ -14,6 +14,7 @@
     ../modules/git.nix
     ../modules/editor.nix
     ../modules/terminal.nix
+    ../modules/dev.nix
     ./ssh.nix
   ];
 

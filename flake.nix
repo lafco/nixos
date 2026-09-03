@@ -84,6 +84,7 @@
           ./modules/nixos/desktop.nix
           ./modules/nixos/gaming.nix
           ./modules/nixos/torrents.nix
+          ./modules/nixos/database.nix
           disko.nixosModules.disko
           sops-nix.nixosModules.sops
           home-manager.nixosModules.home-manager
