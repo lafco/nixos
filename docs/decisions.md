@@ -89,3 +89,51 @@ Comparação completa: [NixOS Wiki](https://wiki.nixos.org/wiki/Comparison_of_se
   [NotAShelf/nyx](https://github.com/NotAShelf/nyxexprs),
   [fufexan/dotfiles](https://github.com/fufexan/dotfiles),
   [Ryan Yin — NixOS & Flakes Book](https://nixos-and-flakes.thiscute.world/).
+
+## 5. SecretSpec e devenv — avaliados em set/2026 e NÃO adotados (por enquanto)
+
+### SecretSpec → esperar o 1.0 (sops-nix permanece)
+
+[SecretSpec](https://secretspec.dev/) (Cachix, Apache-2.0) separa a *declaração* de
+segredos (`secretspec.toml`, commitável) do *provisionamento* (provider por máquina:
+keyring, 1Password, SOPS, age, systemd credentials…), resolvendo em runtime via
+`secretspec run`. Avaliação (set/2026, v0.20.0):
+
+- **Maturidade é o fator decisivo**: pré-1.0, 36 releases com ~18 breaking, minors
+  quase semanais ([lib.rs](https://lib.rs/crates/secretspec)) — cada bump do nixpkgs
+  arriscaria churn no flake.
+- **Não tem módulo NixOS nem home-manager** (só pacote no nixpkgs + integração com
+  devenv + provider systemd-credential): adotar significaria perder o
+  `sops.secrets.<name>` automático e escrever `LoadCredential` na mão por serviço.
+- **Escala**: profiles/scopes/SDKs/audit brilham para times; para 3 máquinas sem
+  segredos reais, é overkill.
+- **Sem lock-in na espera**: o [provider SOPS](https://secretspec.dev/providers/sops/)
+  dele lê o mesmo `secrets/secrets.yaml` (age + ssh-to-age) que este repo já usa.
+
+**Decisão**: manter sops-nix. **Reavaliar quando** sair o 1.0 (ou um módulo NixOS de
+primeira classe). Piloto opcional de baixo custo: CLI no trabalho lendo o
+`secrets.yaml` via provider SOPS, sem trocar o provisionamento real.
+Acompanhar: [anúncio](https://discourse.nixos.org/t/announcing-secretspec-declarative-secrets-management/67021),
+[0.17](https://discourse.nixos.org/t/secretspec-0-17-scopes-secrets-caching-sops-age-and-systemd-credentials/79184),
+[0.20](https://discourse.nixos.org/t/secretspec-0-20/79863).
+
+### devenv → não adotado (repo permanece flakes puros)
+
+[devenv](https://devenv.sh/) (Cachix, Apache-2.0, v2.2 em set/2026) é um sistema de
+módulos de alto nível (languages, services, processes, tasks, hooks) para ambientes
+de dev. Avaliação:
+
+- O próprio projeto recomenda o **CLI dedicado** (`devenv.nix` + `devenv.lock`); o
+  modo via flake é explicitamente "reduced features" ([Using with Flakes](https://devenv.sh/guides/using-with-flakes/))
+  — sem GC protection, sem caching de eval, sem integração SecretSpec — e exige
+  `--no-pure-eval` + cache próprio (`devenv.cachix.org`).
+- Para o **devShell deste repo** (nixfmt, sops, age, nil, nixos-anywhere), o
+  `devShells.default` + nix-direnv já resolve: devenv seria uma abstração e um cache
+  extras para ganho ~zero.
+- O caso de uso real dele é **ambiente por projeto** (services como postgres/redis,
+  toolchain pinada) — se um projeto futuro precisar, usar o CLI por projeto, fora
+  deste repo de OS.
+- Direção: migração em andamento para [Tvix](https://devenv.sh/blog/2024/10/22/devenv-is-switching-its-nix-implementation-to-tvix/).
+
+**Decisão**: não adotar neste repo. **Reconsiderar** apenas como padrão por projeto
+(na máquina da empresa/daily), nunca como substituto do devShell do repo.
