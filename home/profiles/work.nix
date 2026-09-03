@@ -17,7 +17,9 @@
   };
 
   home.packages = with pkgs; [
-    # Ferramentas específicas do trabalho, ex.:
+    intelephense # LSP de PHP — só na máquina do trabalho
+
+    # Outras ferramentas específicas do trabalho:
     # nodejs_20
     # python311
     # kubectl

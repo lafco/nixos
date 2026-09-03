@@ -118,6 +118,7 @@
         extraSpecialArgs = { inherit inputs; };
         modules = [
           ./home/lafco
+          ./home/lafco/standalone.nix
           ./home/profiles/work.nix
           # Segredos na máquina do trabalho (opcional): descomente quando for
           # usar e crie secrets/secrets.yaml primeiro (docs/bootstrap.md).
@@ -129,8 +130,6 @@
           #   };
           # }
         ];
-        # Se um dia a máquina do trabalho for macOS:
-        # modules = modules ++ [ { home.homeDirectory = "/Users/lafco"; } ];
       };
 
       # ── DevShell para mexer neste repo (`nix develop`) ─────────────
