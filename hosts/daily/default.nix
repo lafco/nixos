@@ -20,7 +20,10 @@
   };
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Shell de login: bash (o bashrc vem do repo de dotfiles em ~/dotfiles).
+  # Shell de login: bashInteractive (o bashrc vem do repo de dotfiles em
+  # ~/dotfiles). Precisa ser bashInteractive: o pkgs.bash "puro" do NixOS é
+  # compilado sem readline e não tem os builtins complete/bind, quebrando o
+  # bash-completion e o starship no .bashrc.
   users.users.lafco = {
     isNormalUser = true;
     description = "lafco";
@@ -28,13 +31,19 @@
       "wheel"
       "networkmanager"
     ];
-    shell = pkgs.bash;
+    shell = pkgs.bashInteractive;
     initialPassword = "changeme"; # troque no primeiro login (passwd)
   };
 
   # Arquivos já existentes são preservados antes de o Home Manager instalar
   # as versões declarativas do repositório.
   home-manager.backupFileExtension = "hm-backup";
+
+  # O XFCE reescreve os XMLs do xfconf em runtime, então a cada switch o
+  # arquivo vivo difere do declarativo e um novo .hm-backup seria criado em
+  # cima do anterior (abortando a ativação). Com overwriteBackup, o backup
+  # velho é substituído pelo novo em vez de falhar.
+  home-manager.overwriteBackup = true;
 
   # Ambiente do usuário (home-manager em modo módulo) + perfil pessoal.
   home-manager.users.lafco = {

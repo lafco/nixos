@@ -34,11 +34,16 @@
   services.libinput.enable = true;
 
   fonts.packages = with pkgs; [
-    noto-fonts
-    noto-fonts-color-emoji # emojis coloridos (renomeado de noto-fonts-emoji no nixpkgs)
+    ubuntu-sans # fonte padrão do sistema (sans-serif)
     nerd-fonts.symbols-only # ícones do prompt starship
     jetbrains-mono # fonte pedida pelo wezterm (wezterm.lua: 'Jetbrains Mono')
   ];
+
+  # Ubuntu Sans como sans-serif padrão do fontconfig: o alias "Sans"
+  # (usado pelo XFCE e apps GTK por padrão) resolve para ela.
+  # ⚠️ Noto foi removida — sem fonte de emoji colorido agora; se quiser
+  # emojis de volta, adicione p.ex. joypixels ou openmoji aqui.
+  fonts.fontconfig.defaultFonts.sansSerif = [ "Ubuntu Sans" ];
 
   # Aplicativos gráficos padrão (adicione os seus aqui).
   environment.systemPackages = with pkgs; [

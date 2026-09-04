@@ -20,6 +20,7 @@
     description = "lafco";
     extraGroups = [ "wheel" ];
     # shell = pkgs.zsh; # descomente para usar zsh no login do servidor
+    shell = pkgs.bashInteractive; # evita os erros de complete/bind do pkgs.bash sem readline
     initialPassword = "changeme"; # troque no primeiro login (passwd)
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAA... seu-comentario" # TODO: cole sua chave pública aqui
