@@ -10,8 +10,14 @@
 
   networking.hostName = "daily";
 
-  # UEFI + systemd-boot (disko cria a partição ESP).
-  boot.loader.systemd-boot.enable = true;
+  # UEFI + Limine (disko cria a partição ESP).
+  boot.loader.systemd-boot.enable = false;
+  boot.loader.limine = {
+    enable = true;
+    efiSupport = true;
+    biosSupport = false;
+    enableEditor = false;
+  };
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Shell de login: bash (o bashrc vem do repo de dotfiles em ~/dotfiles).

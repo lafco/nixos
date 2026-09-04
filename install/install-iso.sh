@@ -95,14 +95,14 @@ gum style --foreground 212 --bold --border double --padding "1 4" \
 HOST=$(gum choose "daily" "server" --header "Qual máquina você está instalando?")
 [ -d "hosts/$HOST" ] || die "host '$HOST' não existe em $REPO_DIR/hosts — repo errado ou desatualizado?"
 
-# boot mode: daily espera UEFI (systemd-boot), server espera BIOS (GRUB)
+# boot mode: daily espera UEFI (Limine), server espera BIOS (GRUB)
 if [ -d /sys/firmware/efi ]; then
   BOOTMODE=uefi
 else
   BOOTMODE=bios
 fi
 if [ "$HOST" = "daily" ] && [ "$BOOTMODE" != "uefi" ]; then
-  die "host 'daily' usa systemd-boot (UEFI), mas a máquina bootou em BIOS. Boote a ISO em modo UEFI ou ajuste hosts/daily/disko-config.nix."
+  die "host 'daily' usa Limine/UEFI, mas a máquina bootou em BIOS. Boote a ISO em modo UEFI ou ajuste hosts/daily/disko-config.nix."
 fi
 if [ "$HOST" = "server" ] && [ "$BOOTMODE" != "bios" ]; then
   die "host 'server' usa GRUB/BIOS, mas a máquina bootou em UEFI. Ajuste hosts/server/disko-config.nix (ESP) ou instale o servidor remotamente com nixos-anywhere (docs/install.md)."

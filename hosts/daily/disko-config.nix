@@ -1,5 +1,5 @@
 # Layout de disco declarativo (disko) da máquina de uso diário.
-# UEFI + systemd-boot + btrfs com subvolumes e compressão zstd.
+# UEFI + Limine + btrfs com subvolumes e compressão zstd.
 # Ajuste `device` para o seu disco (ex.: /dev/sda, /dev/nvme0n1).
 {
   disko.devices = {
