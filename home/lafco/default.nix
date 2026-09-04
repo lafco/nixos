@@ -18,7 +18,32 @@
     ./ssh.nix
   ];
 
-  xdg.enable = true;
+  xdg = {
+    enable = true;
+
+    # Pastas padrão do usuário (XDG user dirs). Music, publicShare e
+    # templates ficam desativadas: apontar para $HOME remove o atalho do
+    # Thunar e impede que a pasta seja recriada.
+    userDirs = {
+      enable = true;
+      createDirectories = true;
+
+      desktop = "$HOME/Desktop";
+      documents = "$HOME/Documents";
+      download = "$HOME/Downloads";
+      pictures = "$HOME/Pictures";
+      videos = "$HOME/Videos";
+
+      music = "$HOME";
+      publicShare = "$HOME";
+      templates = "$HOME";
+
+      # Pasta customizada (não é um XDG dir padrão).
+      extraConfig = {
+        XDG_PROJECTS_DIR = "$HOME/Projects";
+      };
+    };
+  };
 
   # Versão do home-manager da primeira ativação — NÃO mude depois.
   home.stateVersion = "26.05";
