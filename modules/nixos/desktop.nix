@@ -37,6 +37,7 @@
     noto-fonts
     noto-fonts-color-emoji # emojis coloridos (renomeado de noto-fonts-emoji no nixpkgs)
     nerd-fonts.symbols-only # ícones do prompt starship
+    jetbrains-mono # fonte pedida pelo wezterm (wezterm.lua: 'Jetbrains Mono')
   ];
 
   # Aplicativos gráficos padrão (adicione os seus aqui).
@@ -44,6 +45,9 @@
     firefox
     thunar # file manager GUI (já vem com o XFCE; explícito por clareza)
     xfce4-screenshooter # usado pelo keybind Print (home/modules/xfce)
+    wezterm # terminal padrão (home/modules/xfce.nix: helpers.rc do exo);
+    # no systemPackages para o exo-open achá-lo no PATH da sessão gráfica
+    # (o home.packages do usuário nem sempre está no PATH do SDDM/XFCE)
     # alacritty
     # vlc
   ];
