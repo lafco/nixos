@@ -4,7 +4,12 @@
 #
 # Acesso:
 #   qBittorrent: http://localhost:8080
-#     primeiro login: admin/adminadmin — TROQUE em Ferramentas → Opções → WebUI
+#     Sem senha fixada, o serviço gera uma TEMPORÁRIA a cada start — veja
+#     em `journalctl -u qbittorrent` ("temporary password..."). Para fixar:
+#     defina a senha na WebUI e copie o hash gerado
+#     (/var/lib/qbittorrent/qBittorrent/config/qBittorrent.conf) para
+#     Preferences.WebUI.Password_PBKDF2 aqui — senão o ExecStartPre
+#     sobrescreve o conf e a senha da WebUI se perde no restart.
 #   Prowlarr: http://localhost:9696 (configure uma conta na primeira visita)
 #
 # Integração: no Prowlarr, Settings → Apps → adicione o qBittorrent para ele
