@@ -36,9 +36,17 @@ in
   # Tema de ícones Papirus (variante escura, via Net/IconThemeName em
   # ./xfce/xsettings.xml). Pastas coloridas: troque por
   # pkgs.papirus-icon-theme.override { color = "violet"; }.
-  home.packages = [ pkgs.papirus-icon-theme ];
+  # O wmctrl é usado pelo ./xfce/xfce-wezterm.sh (keybind Super+Return).
+  home.packages = [
+    pkgs.papirus-icon-theme
+    pkgs.wmctrl
+  ];
 
   home.file = {
+    # Pasta onde o Print salva os screenshots (bind em
+    # ./xfce/xfce4-keyboard-shortcuts.xml).
+    "Pictures/snip/.keep".text = "";
+
     # Terminal padrão do XFCE: Super+t, "Open Terminal Here" do Thunar
     # etc. O exo lê este arquivo (formato key=value, sem header).
     # O wezterm está nos systemPackages do host daily
@@ -58,6 +66,9 @@ in
       ./xfce/panel/launcher-2/17885263881.desktop;
     ".config/xfce4/panel/launcher-7/17885264493.desktop".source =
       ./xfce/panel/launcher-7/17885264493.desktop;
+
+    # Keybind Super+Return: abre/foca o wezterm (ver ./xfce/xfce-wezterm.sh).
+    ".local/bin/xfce-wezterm.sh".source = ./xfce/xfce-wezterm.sh;
   }
   // builtins.listToAttrs (
     map (c: {
