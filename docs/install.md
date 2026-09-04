@@ -123,7 +123,7 @@ nix run nixpkgs#nixos-anywhere -- \
 | `sudo nix ...` reclama de features experimentais | o script usa `sudo env NIX_CONFIG=...` (o `/etc/nix` da ISO é read-only); à mão, use `sudo nix --extra-experimental-features 'nix-command flakes' ...`. |
 | `sh: /etc/nix/nix.conf: read-only file system` | esperado na ISO (squashfs) — era um bug de versões antigas do script que tentavam escrever lá; rode a versão atual, que usa `NIX_CONFIG`. |
 | `hosts/<host>/hardware-configuration.nix: No such file or directory` | o clone usado não é este repo — provavelmente o de dotfiles (`lafco/config`, que não tem `hosts/`) em `~/dotfiles`. O script agora clona em `~/nixos` e valida o `flake.nix`/`hosts/` antes de seguir; na dúvida, `rm -rf ~/dotfiles` (clone antigo na ISO) e rode de novo. |
-| `git: command not found` | a ISO minimal não traz git; o script instala via `nix profile install nixpkgs#git`. |
+| `git: command not found` | a ISO minimal não traz git; o script instala via `nix profile add nixpkgs#git`. |
 | "host 'daily' ... BIOS" | boote a ISO em UEFI (ou ajuste o disko para GRUB). |
 | "host 'server' ... UEFI" | use o fluxo remoto (nixos-anywhere) ou adicione ESP no disko do server. |
 | Clone falha na rede corporativa | na ISO o `/etc/nix` é read-only: use `NIX_CONFIG` (ou `~/.config/nix/nix.conf`) para o proxy do Nix e `git config http.proxy`. |

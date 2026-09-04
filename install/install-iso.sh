@@ -48,7 +48,10 @@ ROOT_NIX=(sudo env "NIX_CONFIG=experimental-features = nix-command flakes" nix)
 # ── 2. ferramentas da TUI ─────────────────────────────────────────────────
 say "Baixando git e gum (interface da TUI)"
 if ! command -v git >/dev/null 2>&1 || ! command -v gum >/dev/null 2>&1; then
-  nix profile install nixpkgs#git nixpkgs#gum
+  # `add` é o nome atual; `install` é alias deprecated no Nix >= 2.30
+  # (o fallback cobre ISOs antigas, em que `add` ainda não existe).
+  nix profile add nixpkgs#git nixpkgs#gum 2>/dev/null \
+    || nix profile install nixpkgs#git nixpkgs#gum
 fi
 
 # ── 3. obtém o repo ───────────────────────────────────────────────────────

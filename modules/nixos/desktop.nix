@@ -35,7 +35,7 @@
 
   fonts.packages = with pkgs; [
     noto-fonts
-    noto-fonts-emoji
+    noto-fonts-color-emoji # emojis coloridos (renomeado de noto-fonts-emoji no nixpkgs)
     nerd-fonts.symbols-only # ícones do prompt starship
   ];
 
