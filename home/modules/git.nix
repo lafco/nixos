@@ -3,11 +3,11 @@
 {
   programs.git = {
     enable = true;
-    user = {
-      name = "lafco";
-      email = "lafgo@proton.me";
-    };
     settings = {
+      user = {
+        name = "lafco";
+        email = "lafgo@proton.me";
+      };
       init.defaultBranch = "main";
       pull.rebase = true;
     };
