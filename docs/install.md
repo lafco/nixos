@@ -12,15 +12,15 @@ A ISO precisa alcançar este repo de alguma forma:
   pública. É a opção mais simples de manter.
 
 O script clona **`https://github.com/lafco/nixos` por padrão** (sem
-perguntar a URL); se o repo estiver em outro lugar (mirror corporativo,
-clone local), sobrescreva na hora de rodar:
+perguntar a URL) para **`~/nixos`**; se o repo estiver em outro lugar
+(mirror corporativo, clone local), sobrescreva na hora de rodar:
 
 ```sh
 REPO_URL=https://seu-mirror/lafco/nixos sh <(curl -L <URL-do-script>/install/install-iso.sh)
 ```
 - **B. Rede local:** na máquina com o repo:
   ```sh
-  cd ~/dotfiles && git update-server-info && python3 -m http.server 8000
+  cd ~/nixos && git update-server-info && python3 -m http.server 8000
   ```
   (serve o repo por HTTP "dumb"; funciona para `git clone` e `curl`.)
 - **C. Pendrive:** copie o repo inteiro para um pendrive e rode o script
@@ -46,7 +46,7 @@ sh <(curl -L <URL-do-script>/install/install-iso.sh)
 sh /media/<pendrive>/install/install-iso.sh
 
 # A/B: se preferir clonar na mão antes:
-git clone <URL-do-repo> ~/dotfiles && cd ~/dotfiles && ./install/install-iso.sh
+git clone https://github.com/lafco/nixos ~/nixos && cd ~/nixos && ./install/install-iso.sh
 ```
 
 A TUI pergunta: **host** (daily/server) → **hostname** → **disco** → **usuário**
@@ -122,6 +122,7 @@ nix run nixpkgs#nixos-anywhere -- \
 |---|---|
 | `sudo nix ...` reclama de features experimentais | o script usa `sudo env NIX_CONFIG=...` (o `/etc/nix` da ISO é read-only); à mão, use `sudo nix --extra-experimental-features 'nix-command flakes' ...`. |
 | `sh: /etc/nix/nix.conf: read-only file system` | esperado na ISO (squashfs) — era um bug de versões antigas do script que tentavam escrever lá; rode a versão atual, que usa `NIX_CONFIG`. |
+| `hosts/<host>/hardware-configuration.nix: No such file or directory` | o clone usado não é este repo — provavelmente o de dotfiles (`lafco/config`, que não tem `hosts/`) em `~/dotfiles`. O script agora clona em `~/nixos` e valida o `flake.nix`/`hosts/` antes de seguir; na dúvida, `rm -rf ~/dotfiles` (clone antigo na ISO) e rode de novo. |
 | `git: command not found` | a ISO minimal não traz git; o script instala via `nix profile install nixpkgs#git`. |
 | "host 'daily' ... BIOS" | boote a ISO em UEFI (ou ajuste o disko para GRUB). |
 | "host 'server' ... UEFI" | use o fluxo remoto (nixos-anywhere) ou adicione ESP no disko do server. |

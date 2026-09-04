@@ -16,8 +16,8 @@
 #   C) Repo num pendrive: rode o script direto do pendrive
 #        sh /media/pendrive/install/install-iso.sh   (detecta o repo ao lado)
 #
-# O script clona github:lafco/nixos por padrão; sobrescreva com REPO_URL=
-# (ex.: mirror corporativo). Detalhes: docs/install.md
+# O script clona github:lafco/nixos por padrão (para ~/nixos); sobrescreva
+# com REPO_URL= (ex.: mirror corporativo). Detalhes: docs/install.md
 # ═══════════════════════════════════════════════════════════════════════════
 set -euo pipefail
 
@@ -58,10 +58,12 @@ if [ -f "$SCRIPT_DIR/../flake.nix" ]; then
   REPO_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
   echo "Repo encontrado ao lado do script (modo USB/local): $REPO_DIR"
 else
-  # Repo fixo — sempre este repo (lafco/nixos). REPO_URL existe só para
-  # sobrescrever (ex.: mirror corporativo, clone local na rede).
+  # Repo fixo — sempre ESTE repo (lafco/nixos, o do flake.nix). REPO_URL
+  # existe só para sobrescrever (ex.: mirror corporativo, clone local na
+  # rede). Clone vai para ~/nixos — NUNCA ~/dotfiles, nome do repo de
+  # dotfiles (lafco/config), baixado em /tmp no passo 7.
   url="${REPO_URL:-https://github.com/lafco/nixos}"
-  REPO_DIR="$HOME/dotfiles"
+  REPO_DIR="$HOME/nixos"
   if [ -d "$REPO_DIR/.git" ]; then
     say "Repo já clonado em $REPO_DIR — atualizando"
     git -C "$REPO_DIR" pull --ff-only || die "git pull falhou em $REPO_DIR."
@@ -72,12 +74,17 @@ else
   fi
 fi
 cd "$REPO_DIR"
+# Garante que o obtido é ESTE repo — o de dotfiles (lafco/config) não tem
+# flake.nix nem hosts/ e quebraria o passo 5 com "No such file or directory".
+[ -f flake.nix ] && [ -d hosts ] \
+  || die "$REPO_DIR não é o repo de configuração (falta flake.nix/hosts). Remova esse diretório e rode de novo — ou aponte REPO_URL para o repo certo."
 
 # ── 4. TUI ────────────────────────────────────────────────────────────────
 gum style --foreground 212 --bold --border double --padding "1 4" \
   "Instalador NixOS" "repo: $(basename "$REPO_DIR")"
 
 HOST=$(gum choose "daily" "server" --header "Qual máquina você está instalando?")
+[ -d "hosts/$HOST" ] || die "host '$HOST' não existe em $REPO_DIR/hosts — repo errado ou desatualizado?"
 
 # boot mode: daily espera UEFI (systemd-boot), server espera BIOS (GRUB)
 if [ -d /sys/firmware/efi ]; then
