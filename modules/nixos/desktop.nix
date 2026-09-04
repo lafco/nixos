@@ -33,6 +33,11 @@
   # Touchpad/trackpad.
   services.libinput.enable = true;
 
+  # O XFCE ativa services.graphical-desktop, que liga o set padrão de
+  # fontes (DejaVu, Liberation, unifont e Noto CJK/Emoji). Desligamos para
+  # controlar 100% da lista abaixo (Noto fora).
+  fonts.enableDefaultPackages = false;
+
   fonts.packages = with pkgs; [
     ubuntu-sans # fonte padrão do sistema (sans-serif)
     nerd-fonts.symbols-only # ícones do prompt starship
@@ -53,6 +58,7 @@
     wezterm # terminal padrão (home/modules/xfce.nix: helpers.rc do exo);
     # no systemPackages para o exo-open achá-lo no PATH da sessão gráfica
     # (o home.packages do usuário nem sempre está no PATH do SDDM/XFCE)
+    yaru-theme # cursor "Yaru" do Ubuntu (setado em home/modules/xfce/xsettings.xml)
     # alacritty
     # vlc
   ];
