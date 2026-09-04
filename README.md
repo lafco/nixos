@@ -67,8 +67,14 @@ Passo a passo completo (chaves SSH/age, segredos, instalação do zero):
 
 ## TODO antes do primeiro uso real
 
-- [ ] Trocar identidade git em `home/modules/git.nix` e `home/profiles/work.nix`
-- [ ] Gerar `hosts/*/hardware-configuration.nix` nas máquinas reais
+Já coberto pelo `install/install-iso.sh` (a TUI pergunta/gera na hora):
+
+- [x] Gerar `hosts/*/hardware-configuration.nix` (o script roda `nixos-generate-config`)
+- [x] Ajustar o disco em `hosts/*/disko-config.nix` (o script sobrescreve `device` no `local.nix`)
+- [x] Chave SSH do servidor (o script pergunta e grava no `local.nix` do host `server`)
+- [x] Identidade git pessoal (`lafco <lafgo@proton.me>` em `home/modules/git.nix`)
+
+Ainda manual:
+
+- [ ] Identidade git da empresa em `home/profiles/work.nix` (nome/email do trabalho)
 - [ ] Configurar chaves em `.sops.yaml` e criar `secrets/secrets.yaml`
-- [ ] Colar sua chave SSH pública em `hosts/server/default.nix`
-- [ ] Ajustar discos em `hosts/*/disko-config.nix`

@@ -3,9 +3,8 @@
 {
   programs.git = {
     enable = true;
-    # TODO: ajuste identidade antes do primeiro commit
     userName = "lafco";
-    userEmail = "lafco@users.noreply.github.com";
+    userEmail = "lafgo@proton.me";
     extraConfig = {
       init.defaultBranch = "main";
       pull.rebase = true;
