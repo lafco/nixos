@@ -13,7 +13,7 @@
 │   ├── lafco/                #   core do usuário (importa home/modules/)
 │   ├── modules/              #   módulos HM: dotfiles (symlinks), shell, git,
 │   │                         #   editor, terminal, dev (runtimes), ai, apps,
-│   │                         #   xfce (painel/keybinds)
+│   │                         #   xfce (painel/keybinds/ícones)
 │   └── profiles/             #   personal / work / server
 ├── modules/nixos/            # módulos NixOS reutilizáveis (common, desktop, gaming, torrents, database, server)
 ├── install/                  # instalador TUI da ISO minimal (install-iso.sh)

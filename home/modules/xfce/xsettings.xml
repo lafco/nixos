@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  xsettings do XFCE (formato xfconf do canal "xsettings"). Só o custom:
+  tema de ícones Papirus, variante escura (Net/IconThemeName). O resto
+  (GTK theme, fontes, cursores...) fica no padrão do XFCE.
+
+  O pacote em si é instalado em home/modules/xfce.nix (home.packages).
+  Pra usar a variante clara, troque "Papirus-Dark" por "Papirus" abaixo.
+-->
+<channel name="xsettings" version="1.0">
+  <property name="Net" type="empty">
+    <property name="IconThemeName" type="string" value="Papirus-Dark"/>
+  </property>
+</channel>
