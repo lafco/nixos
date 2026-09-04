@@ -7,6 +7,7 @@
     starship
     zoxide
     atuin
+    bash-preexec # atuin no bash precisa dele (ou ble.sh) para capturar comandos
     television
 
     # cat/ls/find/grep modernos
@@ -34,4 +35,7 @@
     enable = true;
     nix-direnv.enable = true;
   };
+
+  # Caminho do bash-preexec usado no bash/.bashrc do repo de dotfiles.
+  home.sessionVariables.BASH_PREEXEC_SH = "${pkgs.bash-preexec}/share/bash/bash-preexec.sh";
 }
