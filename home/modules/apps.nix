@@ -55,10 +55,12 @@ in
       name = "lafco";
       isDefault = true;
 
+      # Motores de busca agora são referenciados por ID (ddg = DuckDuckGo);
+      # o nome antigo gera warning de deprecation no home-manager.
       search = {
         force = true;
-        default = "DuckDuckGo";
-        privateDefault = "DuckDuckGo";
+        default = "ddg";
+        privateDefault = "ddg";
       };
 
       settings = {
