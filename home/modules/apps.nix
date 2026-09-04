@@ -24,7 +24,9 @@ in
   home.packages = with pkgs; [
     proton-pass # app desktop do Proton Pass (Linux)
     obsidian # notas — template de tema disponível no Noctalia
-    ankama-launcher # jogos Ankama (Dofus, Waven, Wakfu…) — AppImage + wine via nixpkgs
+    # O updater interno é desativado pelo overlay: o AppImage fica imutável no
+    # /nix/store e novas versões são aplicadas pelo flake/Nix.
+    ankama-launcher # jogos Ankama (Dofus, Waven, Wakfu…) — AppImage + wine
   ];
 
   # Player de vídeo com aceleração de hardware na RX 7600 (VAAPI)
