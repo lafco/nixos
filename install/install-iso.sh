@@ -236,12 +236,24 @@ EOF
   exit 1
 fi
 
+# ── 7b. dono dos repos copiados ──────────────────────────────────────────
+# Os repos foram copiados com cp -a (root); ajusta o dono JÁ AQUI para o
+# git pull/commit funcionar sem sudo no primeiro boot. O chown roda DENTRO
+# do sistema instalado (nixos-enter): o usuário ainda não existe no
+# /etc/passwd da ISO, só no /mnt/etc/passwd.
+say "Ajustando dono dos repos copiados ($USERNAME)"
+CHOWN_PATHS=("'/home/$USERNAME/nixos'" "'/home/$USERNAME/dotfiles'")
+if [ -n "$AGEKEY" ] && [ -f "$AGEKEY" ]; then
+  CHOWN_PATHS+=("'/home/$USERNAME/.config/sops'")
+fi
+sudo nixos-enter --root /mnt -c "chown -R -- '$USERNAME:' ${CHOWN_PATHS[*]}"
+
 # ── 8. finalização ────────────────────────────────────────────────────────
 gum style --foreground 212 --bold \
   "Instalação concluída! ✓" \
   "" \
-  "Após o primeiro boot, ajuste as permissões dos repos copiados:" \
-  "  cd ~/nixos && git reset && sudo chown -R $USERNAME: ~/nixos ~/dotfiles" \
+  "Após o primeiro boot:" \
+  "  cd ~/nixos && git reset   # remove os intent-to-add do install" \
   "" \
   "Dotfiles: ~/dotfiles (github:lafco/config) — edits têm efeito imediato." \
   "Para aplicar mudanças depois: sudo nixos-rebuild switch --flake ~/nixos#$HOST"

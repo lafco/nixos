@@ -12,5 +12,14 @@
       ./xfce/xfce4-panel.xml;
     ".config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml".source =
       ./xfce/xfce4-keyboard-shortcuts.xml;
+
+    # Terminal padrão do XFCE: Super+t (exo-open --launch TerminalEmulator),
+    # "Open Terminal Here" do Thunar etc. O exo lê este arquivo
+    # (formato key=value, grupo [Default] implícito — sem header).
+    # O wezterm está nos systemPackages do host daily
+    # (modules/nixos/desktop.nix) para o exo sempre achá-lo no PATH.
+    ".config/xfce4/helpers.rc".text = ''
+      TerminalEmulator=wezterm
+    '';
   };
 }

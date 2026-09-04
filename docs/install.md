@@ -117,9 +117,13 @@ O script então:
 ```sh
 cd ~/nixos
 git reset                        # remove os intent-to-add do install
-sudo chown -R lafco: ~/nixos ~/dotfiles   # os repos foram copiados como root
 sudo passwd lafco                # opcional: trocar a senha (ela não será sobrescrita)
 ```
+
+> O instalador já ajusta o dono dos repos copiados (`~/nixos`, `~/dotfiles` e
+> a chave age) durante a instalação, via `nixos-enter` — o `chown` manual só
+> é necessário em máquinas instaladas com versões antigas do `install-iso.sh`
+> (aí: `sudo chown -R lafco: ~/nixos ~/dotfiles`).
 
 Recomendado: **commitar o `hardware-configuration.nix`** gerado (é específico
 da máquina e versionado de propósito):
