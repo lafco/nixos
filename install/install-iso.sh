@@ -164,6 +164,14 @@ HASH=$(nix shell nixpkgs#mkpasswd --command mkpasswd -m sha-512 "$PASS1")
 git add -N -f "hosts/$HOST/local.nix"
 
 # ── 7. instalação (formata com disko, monta e roda nixos-install) ─────────
+# Na ISO, os paths NOVOS do store vão para um tmpfs (RAM). Tentativas
+# anteriores deixam GB lá (closure inteira de um build que falhou) e
+# enchem a memória → OOM. Coletar o lixo antes do build grande evita isso
+# sem apagar nada em uso (profiles são GC roots).
+say "Limpando lixo do store de tentativas anteriores (store da ISO vive em RAM)"
+nix-collect-garbage 2>/dev/null || true
+sudo nix-collect-garbage 2>/dev/null || true
+
 say "Baixando o repo de dotfiles (lafco/config) para ~/dotfiles"
 DOTFILES_URL="${DOTFILES_URL:-https://github.com/lafco/config}"
 DOTFILES_DIR=/tmp/lafco-config

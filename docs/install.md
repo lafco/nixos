@@ -123,6 +123,7 @@ nix run nixpkgs#nixos-anywhere -- \
 | `sudo nix ...` reclama de features experimentais | o script usa `sudo env NIX_CONFIG=...` (o `/etc/nix` da ISO é read-only); à mão, use `sudo nix --extra-experimental-features 'nix-command flakes' ...`. |
 | `sh: /etc/nix/nix.conf: read-only file system` | esperado na ISO (squashfs) — era um bug de versões antigas do script que tentavam escrever lá; rode a versão atual, que usa `NIX_CONFIG`. |
 | `hosts/<host>/hardware-configuration.nix: No such file or directory` | o clone usado não é este repo — provavelmente o de dotfiles (`lafco/config`, que não tem `hosts/`) em `~/dotfiles`. O script agora clona em `~/nixos` e valida o `flake.nix`/`hosts/` antes de seguir; na dúvida, `rm -rf ~/dotfiles` (clone antigo na ISO) e rode de novo. |
+| `Out of memory`/OOM-killer durante o install | na ISO os paths novos do store vão para tmpfs (RAM) e tentativas repetidas acumulam GB no mesmo boot. **Reinicie a ISO** e rode o script uma única vez — a versão atual roda `nix-collect-garbage` antes do build grande. Máquinas com pouca RAM: instale via `nixos-anywhere` (seção 5). |
 | `git: command not found` | a ISO minimal não traz git; o script instala via `nix profile add nixpkgs#git`. |
 | "host 'daily' ... BIOS" | boote a ISO em UEFI (ou ajuste o disko para GRUB). |
 | "host 'server' ... UEFI" | use o fluxo remoto (nixos-anywhere) ou adicione ESP no disko do server. |
