@@ -5,38 +5,30 @@
   <property name="panels" type="array">
     <value type="int" value="1"/>
     <property name="panel-1" type="empty">
-      <property name="position" type="string" value="p=10;x=964;y=1055"/>
+      <property name="position" type="string" value="p=9;x=949;y=21"/>
       <property name="length" type="double" value="1"/>
       <property name="position-locked" type="bool" value="true"/>
       <property name="size" type="uint" value="36"/>
       <property name="plugin-ids" type="array">
-        <value type="int" value="1"/>
+        <value type="int" value="3"/>
         <value type="int" value="9"/>
         <value type="int" value="15"/>
         <value type="int" value="19"/>
         <value type="int" value="21"/>
         <value type="int" value="5"/>
-        <value type="int" value="20"/>
         <value type="int" value="16"/>
         <value type="int" value="6"/>
       </property>
       <property name="autohide-behavior" type="uint" value="1"/>
       <property name="length-adjust" type="bool" value="true"/>
-      <property name="border-width" type="uint" value="0"/>
+      <property name="border-width" type="uint" value="2"/>
       <property name="mode" type="uint" value="0"/>
       <property name="background-style" type="uint" value="0"/>
-      <property name="icon-size" type="uint" value="28"/>
+      <property name="icon-size" type="uint" value="32"/>
     </property>
     <property name="dark-mode" type="bool" value="true"/>
   </property>
   <property name="plugins" type="empty">
-    <property name="plugin-1" type="string" value="applicationsmenu">
-      <property name="show-generic-names" type="bool" value="false"/>
-      <property name="show-menu-icons" type="bool" value="true"/>
-      <property name="show-button-title" type="bool" value="false"/>
-      <property name="small" type="bool" value="true"/>
-      <property name="show-tooltips" type="bool" value="false"/>
-    </property>
     <property name="plugin-5" type="string" value="systray">
       <property name="known-legacy-items" type="array">
         <value type="string" value="networkmanager applet"/>
@@ -44,13 +36,14 @@
       <property name="known-items" type="array">
         <value type="string" value="blueman"/>
       </property>
-      <property name="icon-size" type="int" value="0"/>
+      <property name="icon-size" type="int" value="22"/>
       <property name="square-icons" type="bool" value="false"/>
       <property name="hide-new-items" type="bool" value="true"/>
       <property name="single-row" type="bool" value="true"/>
       <property name="hidden-items" type="array">
       </property>
       <property name="menu-is-primary" type="bool" value="false"/>
+      <property name="symbolic-icons" type="bool" value="false"/>
     </property>
     <property name="plugin-6" type="string" value="clock">
       <property name="mode" type="uint" value="2"/>
@@ -79,9 +72,7 @@
       <property name="show-only-minimized" type="bool" value="false"/>
       <property name="include-all-workspaces" type="bool" value="false"/>
     </property>
-    <property name="plugin-20" type="string" value="pulseaudio">
-      <property name="enable-keyboard-shortcuts" type="bool" value="true"/>
-    </property>
     <property name="plugin-21" type="string" value="separator"/>
+    <property name="plugin-3" type="string" value="separator"/>
   </property>
 </channel>
