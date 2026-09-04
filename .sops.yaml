@@ -1,14 +1,15 @@
 # Regras de criação de segredos do sops-nix.
 #
-# 1. Sua chave age (máquina do trabalho e edição local):
+# 1. Sua chave age (edição local):
 #      mkdir -p ~/.config/sops/age && age-keygen -o ~/.config/sops/age/keys.txt
-# 2. Chave do host daily/server (decripta no próprio servidor):
+# 2. Chave do host daily/server (decripta no próprio host):
 #      ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub   (rodado NA máquina)
-# 3. Substitua os placeholders abaixo pelas chaves públicas (age1...).
+# 3. server_host: adicione quando for configurar segredos no servidor
+#    (rode o ssh-to-age no servidor e re-encripte com `sops updatekeys`).
 keys:
-  - &lafco age1_SUBSTITUA_PELA_SUA_CHAVE_AGE
-  - &daily_host age1_SUBSTITUA_PELO_SSH_TO_AGE_DA_DAILY
-  - &server_host age1_SUBSTITUA_PELO_SSH_TO_AGE_DO_SERVER
+  - &lafco age18dkq4la03ueml7y8j6p322ve8ckk9dygx3l89vk0vja4z5aegqtqcda92p
+  - &daily_host age1ewaflfcud5den8qx33epwgvtu4mtdzj9fpzyntn7mnlz4pxnp4xsgn57r9
+  # - &server_host age1_SUBSTITUA_PELO_SSH_TO_AGE_DO_SERVER
 
 creation_rules:
   - path_regex: ^secrets/secrets\.yaml$
@@ -16,4 +17,3 @@ creation_rules:
       - age:
           - *lafco
           - *daily_host
-          - *server_host

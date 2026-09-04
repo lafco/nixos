@@ -23,6 +23,7 @@ let
     "xfce4-keyboard-shortcuts"
     "xfce4-notifyd"
     "xfce4-panel"
+    "xfce4-power-manager"
     "xfce4-screensaver"
     "xfce4-settings-editor"
     "xfce4-settings-manager"

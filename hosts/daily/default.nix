@@ -33,6 +33,9 @@
     ];
     shell = pkgs.bashInteractive;
     initialPassword = "changeme"; # troque no primeiro login (passwd)
+    # Mantém os serviços de usuário (ex.: herdr) rodando sem login —
+    # equivalente declarativo de `loginctl enable-linger lafco`.
+    linger = true;
   };
 
   # Arquivos já existentes são preservados antes de o Home Manager instalar
