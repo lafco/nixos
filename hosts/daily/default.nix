@@ -26,6 +26,10 @@
     initialPassword = "changeme"; # troque no primeiro login (passwd)
   };
 
+  # Arquivos já existentes são preservados antes de o Home Manager instalar
+  # as versões declarativas do repositório.
+  home-manager.backupFileExtension = "hm-backup";
+
   # Ambiente do usuário (home-manager em modo módulo) + perfil pessoal.
   home-manager.users.lafco = {
     imports = [ ../../home/lafco ../../home/profiles/personal.nix ];
