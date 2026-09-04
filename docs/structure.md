@@ -7,9 +7,9 @@
 | `flake.nix` | Entrada única. Declara inputs (nixpkgs, home-manager, sops-nix, disko, treefmt) e os três alvos: `nixosConfigurations.daily`, `nixosConfigurations.server`, `homeConfigurations."lafco@work"`. |
 | `hosts/<maquina>/default.nix` | Config específica da máquina NixOS (hostname, usuário, bootloader, segredos). Importa o `hardware-configuration.nix` e o `disko-config.nix` da mesma pasta. |
 | `hosts/<maquina>/hardware-configuration.nix` | GERADO por máquina (drives/rede/firmware). Substitua o stub pelo arquivo real — o instalador da ISO faz isso por você. |
-| `hosts/<maquina>/disko-config.nix` | Layout de disco declarativo (usado pelo disko-install na instalação). |
+| `hosts/<maquina>/disko-config.nix` | Layout de disco declarativo (usado pelo disko na instalação). |
 | `hosts/<maquina>/local.nix` | Opcional, por máquina, **no .gitignore**: overrides locais (hostname, disco, senha hasheada) gerados por `install/install-iso.sh`. Fica visível ao flake via `git add -N -f` (intent-to-add), sem nunca ser commitado. |
-| `install/install-iso.sh` | Instalador TUI para a ISO minimal (habilita flakes, clona o repo, pergunta host/disco/usuário, gera hardware-config, chama o disko-install). Veja `docs/install.md`. |
+| `install/install-iso.sh` | Instalador TUI para a ISO minimal (habilita flakes, clona o repo, pergunta host/disco/usuário, gera hardware-config, formata/monta com disko e roda o nixos-install — closure direto no disco, sem encher a RAM). Veja `docs/install.md`. |
 | `modules/nixos/` | Módulos NixOS reutilizáveis: `common.nix` (tudo que é igual em daily e server), `desktop.nix` (XFCE, só daily), `gaming.nix` (Steam/GameMode, só daily), `torrents.nix` (qBittorrent headless + Prowlarr em localhost, só daily), `database.nix` (Postgres local, só daily), `server.nix` (endurecimento SSH, só server). |
 | `lib/` | Helpers (`default.nix`) e `overlays.nix`: `pkgs.unstable.*` (pi/herdr, do nixpkgs-unstable). |
 | `home/lafco/` | Core do usuário em home-manager. Importa os módulos LOCAIS de `home/modules/` (antes eles vinham do repo de dotfiles, que hoje é só stow + CLI `dot`): `dotfiles.nix` (symlinks), `shell.nix`, `git.nix`, `editor.nix`, `terminal.nix` — mais o `ssh.nix` local. |

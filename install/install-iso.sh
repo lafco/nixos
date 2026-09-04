@@ -4,16 +4,22 @@
 #
 # Fluxo: boot da ISO minimal → roda este script → TUI (host, disco, usuário,
 # senha) → hardware-config gerado → local.nix com overrides da máquina →
-# disko-install formata, monta e instala → reboot.
+# disko formata e monta o disco → nixos-install builda a closure DIRETO no
+# store do disco (nada de closure inteira em RAM) → reboot.
 #
 # Como obter o script na ISO (qualquer uma):
-#   A) Repo no GitHub:
+#   A) URL curta (decorável — recomendada):
+#        curl -Ls https://lafco.github.io/i | sh
+#      A URL /i é um bootstrap estático (pages/i) que baixa SEMPRE a versão
+#      mais nova deste arquivo do GitHub — equivale à opção B. Detalhes:
+#      docs/install.md, seção "A URL curta decorável".
+#   B) Repo no GitHub:
 #        sh <(curl -L https://raw.githubusercontent.com/lafco/nixos/main/install/install-iso.sh)
-#   B) Repo servido na rede local (nesta máquina):
+#   C) Repo servido na rede local (nesta máquina):
 #        cd <repo> && git update-server-info && python3 -m http.server 8000
 #        # na ISO:
 #        sh <(curl -L http://IP:8000/install/install-iso.sh)
-#   C) Repo num pendrive: rode o script direto do pendrive
+#   D) Repo num pendrive: rode o script direto do pendrive
 #        sh /media/pendrive/install/install-iso.sh   (detecta o repo ao lado)
 #
 # O script clona github:lafco/nixos por padrão (para ~/nixos); sobrescreva
@@ -156,6 +162,11 @@ HASH=$(nix shell nixpkgs#mkpasswd --command mkpasswd -m sha-512 "$PASS1")
   echo "  users.users.$USERNAME.initialHashedPassword = lib.mkForce \"$HASH\";"
   echo "  users.users.$USERNAME.initialPassword = lib.mkForce null;"
   echo "  disko.devices.disk.main.device = lib.mkForce \"$DISK_BY_ID\";"
+  # GRUB (server/BIOS): o nixos-install precisa saber o disco do bootloader
+  # (o disko-install antigo injetava isso via --disk; aqui fica explícito).
+  if [ "$HOST" = "server" ]; then
+    echo "  boot.loader.grub.devices = lib.mkForce [ \"$DISK_BY_ID\" ];"
+  fi
   if [ -n "$SSHPUB" ]; then
     echo "  users.users.$USERNAME.openssh.authorizedKeys.keys = lib.mkForce [ \"${SSHPUB//\"/\\\"}\" ];"
   fi
@@ -163,16 +174,16 @@ HASH=$(nix shell nixpkgs#mkpasswd --command mkpasswd -m sha-512 "$PASS1")
 } >"hosts/$HOST/local.nix"
 git add -N -f "hosts/$HOST/local.nix"
 
-# ── 7. instalação (formata com disko, monta e roda nixos-install) ─────────
+# ── 7. instalação (disko formata/monta e nixos-install) ──────────────────
 # Na ISO, os paths NOVOS do store vão para um tmpfs (RAM). Tentativas
 # anteriores deixam GB lá (closure inteira de um build que falhou) e
-# enchem a memória → OOM. Coletar o lixo antes do build grande evita isso
-# sem apagar nada em uso (profiles são GC roots).
+# enchem a memória → OOM. Coletar o lixo antes evita isso sem apagar nada
+# em uso (profiles são GC roots).
 say "Limpando lixo do store de tentativas anteriores (store da ISO vive em RAM)"
 nix-collect-garbage 2>/dev/null || true
 sudo nix-collect-garbage 2>/dev/null || true
 
-say "Baixando o repo de dotfiles (lafco/config) para ~/dotfiles"
+say "Baixando o repo de dotfiles (lafco/config)"
 DOTFILES_URL="${DOTFILES_URL:-https://github.com/lafco/config}"
 DOTFILES_DIR=/tmp/lafco-config
 if [ -d "$DOTFILES_DIR/.git" ]; then
@@ -181,20 +192,49 @@ else
   git clone --depth 1 "$DOTFILES_URL" "$DOTFILES_DIR"
 fi
 
-say "Instalando (disko-install — pode demorar)"
+# Por que NÃO usar disko-install aqui: ele builda a closure INTEIRA do
+# sistema ANTES de montar o disco — no store da ISO, que vive em RAM
+# (tmpfs) — e só depois copia para o SSD. Em máquinas com pouca RAM isso
+# estoura a memória ("Out of memory" justamente na fase de build/copy).
+# Sequência manual equivalente, sem esse gargalo:
+#   1. disko: formata o disco escolhido e monta tudo em /mnt (o swapfile de
+#      8G do layout do daily também é ativado aqui — o disko-install
+#      desligava o swap de propósito, via DISKO_SKIP_SWAP=1);
+#   2. nixos-install (26.05): roda `nix build ... --store /mnt`, ou seja,
+#      baixa/builda a closure DIRETO no store do SSD — a RAM só segura a
+#      avaliação do sistema, nunca a closure inteira.
+DISKO_REF='github:nix-community/disko/latest#disko'
+say "Formatando e montando $DISK_BY_ID (disko)"
+"${ROOT_NIX[@]}" run "$DISKO_REF" -- --mode format,mount --flake ".#$HOST"
+
 # Este repo → ~/nixos; o repo de dotfiles → ~/dotfiles (o home-module
 # dotfiles.nix symlinka os dotfiles de lá — single source of truth).
-INSTALL_ARGS=(
-  --flake ".#$HOST"
-  --disk main "$DISK_BY_ID"
-  --extra-files "$REPO_DIR" "home/$USERNAME/nixos"
-  --extra-files "$DOTFILES_DIR" "home/$USERNAME/dotfiles"
-)
-[ "$HOST" = "daily" ] && INSTALL_ARGS+=(--write-efi-boot-entries)
+say "Copiando os repos para o sistema novo (extra-files)"
+sudo mkdir -p "/mnt/home/$USERNAME"
+sudo cp -a "$REPO_DIR" "/mnt/home/$USERNAME/nixos"
+sudo cp -a "$DOTFILES_DIR" "/mnt/home/$USERNAME/dotfiles"
 if [ -n "$AGEKEY" ] && [ -f "$AGEKEY" ]; then
-  INSTALL_ARGS+=(--extra-files "$AGEKEY" "home/$USERNAME/.config/sops/age/keys.txt")
+  sudo install -D -m 600 "$AGEKEY" "/mnt/home/$USERNAME/.config/sops/age/keys.txt"
 fi
-"${ROOT_NIX[@]}" run 'github:nix-community/disko/latest#disko-install' -- "${INSTALL_ARGS[@]}"
+
+say "Instalando (nixos-install — builda direto no store do disco, sem encher a RAM)"
+if ! sudo env "NIX_CONFIG=experimental-features = nix-command flakes" \
+  nixos-install --no-root-password --no-channel-copy --flake ".#$HOST"; then
+  cat >&2 <<EOF
+
+Instalação falhou. O disco continua particionado e montado em /mnt, com o
+store parcial em /mnt/nix — tentar de novo NÃO recomeça o download:
+
+  cd $REPO_DIR
+  sudo env "NIX_CONFIG=experimental-features = nix-command flakes" \\
+    nixos-install --no-root-password --no-channel-copy --flake .#$HOST
+
+(Se a ISO reiniciou e /mnt está vazio, monte de novo antes com:
+  sudo env "NIX_CONFIG=experimental-features = nix-command flakes" \\
+    nix run $DISKO_REF -- --mode mount --flake .#$HOST)
+EOF
+  exit 1
+fi
 
 # ── 8. finalização ────────────────────────────────────────────────────────
 gum style --foreground 212 --bold \

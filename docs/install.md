@@ -26,6 +26,35 @@ REPO_URL=https://seu-mirror/lafco/nixos sh <(curl -L <URL-do-script>/install/ins
 - **C. Pendrive:** copie o repo inteiro para um pendrive e rode o script
   direto dele na ISO.
 
+### 1.1. A URL curta decorável (`lafco.github.io/i`)
+
+Para não decorar a URL gigante do raw do GitHub, decore só esta:
+
+```sh
+curl -Ls https://lafco.github.io/i | sh
+```
+
+**Como funciona:** `/i` é um arquivo estático no GitHub Pages (repo
+`lafco/lafco.github.io`) que só baixa e executa a versão **mais nova** do
+`install/install-iso.sh` deste repo (branch `main`). Você nunca atualiza a
+URL curta: toda mudança no instalador vale na hora, porque o bootstrap vive
+em cima da `main`. Não é um serviço de redutor de terceiros — é só um
+arquivo seu num domínio do GitHub (com `.nojekyll` para o Pages servir os
+arquivos literalmente, sem processar).
+
+**Configuração única:**
+
+1. Crie o repo **vazio** `lafco.github.io` no GitHub (público, sem README).
+2. Neste repo: `./scripts/publish-pages.sh` (copia `pages/` para lá e faz
+   push). O Pages publica a branch `main` automaticamente.
+3. Teste: `curl -Ls https://lafco.github.io/i | head` deve mostrar o
+   bootstrap. (Se der 404 logo em seguida, o Pages ainda não publicou —
+   espere ~1 minuto.)
+
+**Manutenção:** o conteúdo publicado é o da pasta `pages/` (`i`,
+`.nojekyll`, `index.html`). Rode `./scripts/publish-pages.sh` de novo se
+mudar algo lá — o arquivo `i` em si nunca precisa mudar.
+
 ## 2. Baixar e bootar a ISO
 
 1. Baixe a [ISO minimal do NixOS 26.05](https://nixos.org/download/#nixos-iso).
@@ -39,13 +68,16 @@ REPO_URL=https://seu-mirror/lafco/nixos sh <(curl -L <URL-do-script>/install/ins
 Na ISO (login `nixos`, sem senha):
 
 ```sh
-# opção A/B:
-sh <(curl -L <URL-do-script>/install/install-iso.sh)
+# recomendado — URL curta decorável (seção 1.1):
+curl -Ls https://lafco.github.io/i | sh
 
-# opção C:
+# equivalente, direto do GitHub (opção A):
+sh <(curl -L https://raw.githubusercontent.com/lafco/nixos/main/install/install-iso.sh)
+
+# opção C (pendrive):
 sh /media/<pendrive>/install/install-iso.sh
 
-# A/B: se preferir clonar na mão antes:
+# se preferir clonar na mão antes:
 git clone https://github.com/lafco/nixos ~/nixos && cd ~/nixos && ./install/install-iso.sh
 ```
 
@@ -66,9 +98,14 @@ O script então:
    timezone, senha **hasheada**, disco em `/dev/disk/by-id/...`, chave SSH) e
    usa `git add -N -f` (intent-to-add) para o flake enxergá-lo sem o deixar
    staged — o arquivo fica no `.gitignore`;
-5. clona o repo de dotfiles (`github:lafco/config`) e roda `disko-install`
-   (`--disk main <by-id> --extra-files ...`): particiona com o disko, monta,
-   instala o flake e copia os dois repos para dentro da máquina nova:
+5. clona o repo de dotfiles (`github:lafco/config`) e instala em duas etapas
+   — de propósito, para não estourar a RAM:
+   1. `disko --mode format,mount --flake .#<host>`: formata o disco escolhido
+      e monta tudo em `/mnt` (ativa também o swapfile de 8G do layout);
+   2. `nixos-install --flake .#<host>`: o nixos-install do 26.05 roda
+      `nix build --store /mnt`, ou seja, baixa/builda a closure **direto no
+      store do SSD** — a closure nunca passa inteira pela RAM da ISO.
+   Antes do install, os dois repos são copiados para dentro da máquina nova:
    **este repo → `~/nixos`** e **dotfiles → `~/dotfiles`** (o
    `home/modules/dotfiles.nix` symlinka os dotfiles de lá — single source
    of truth).
@@ -123,7 +160,8 @@ nix run nixpkgs#nixos-anywhere -- \
 | `sudo nix ...` reclama de features experimentais | o script usa `sudo env NIX_CONFIG=...` (o `/etc/nix` da ISO é read-only); à mão, use `sudo nix --extra-experimental-features 'nix-command flakes' ...`. |
 | `sh: /etc/nix/nix.conf: read-only file system` | esperado na ISO (squashfs) — era um bug de versões antigas do script que tentavam escrever lá; rode a versão atual, que usa `NIX_CONFIG`. |
 | `hosts/<host>/hardware-configuration.nix: No such file or directory` | o clone usado não é este repo — provavelmente o de dotfiles (`lafco/config`, que não tem `hosts/`) em `~/dotfiles`. O script agora clona em `~/nixos` e valida o `flake.nix`/`hosts/` antes de seguir; na dúvida, `rm -rf ~/dotfiles` (clone antigo na ISO) e rode de novo. |
-| `Out of memory`/OOM-killer durante o install | na ISO os paths novos do store vão para tmpfs (RAM) e tentativas repetidas acumulam GB no mesmo boot. **Reinicie a ISO** e rode o script uma única vez — a versão atual roda `nix-collect-garbage` antes do build grande. Máquinas com pouca RAM: instale via `nixos-anywhere` (seção 5). |
+| `Out of memory`/OOM-killer durante o install | na ISO os paths novos do store vão para tmpfs (RAM) e tentativas repetidas acumulam GB no mesmo boot. **Reinicie a ISO** e rode o script uma única vez. O instalador atual não usa mais `disko-install` (que buildava a closure inteira em RAM antes de copiar para o disco): ele formata/monta com `disko` e o `nixos-install` builda **direto no store do SSD** (`nix build --store /mnt`), com o swapfile do disko ativo. Se ainda assim faltar RAM para a avaliação, instale via `nixos-anywhere` (seção 5). |
+| warning `no-write-lock-file` durante o install | vem de ferramentas disko/nixos-install upstream (fixam `--option no-write-lock-file true`); é inofensivo. |
 | `git: command not found` | a ISO minimal não traz git; o script instala via `nix profile add nixpkgs#git`. |
 | "host 'daily' ... BIOS" | boote a ISO em UEFI (ou ajuste o disko para GRUB). |
 | "host 'server' ... UEFI" | use o fluxo remoto (nixos-anywhere) ou adicione ESP no disko do server. |
