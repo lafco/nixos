@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Super+Return: abre o wezterm; se já houver uma janela aberta, só foca nela.
+# Super+Return: abre o wezterm rodando o herdr (AI workspace manager);
+# se já houver uma janela aberta, só foca nela.
 #
 # O wezterm roda como um único processo (mux server), então `wezterm start`
-# abre uma aba nova na instância existente — o wmctrl cuida de focar a
+# abriria uma aba nova na instância existente — o wmctrl cuida de focar a
 # janela em vez de abrir outra.
 set -euo pipefail
 
@@ -18,4 +19,4 @@ if command -v wmctrl >/dev/null 2>&1; then
   wmctrl -a wezterm 2>/dev/null && exit 0
 fi
 
-exec wezterm start
+exec wezterm start -- herdr
