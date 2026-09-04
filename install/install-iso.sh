@@ -30,14 +30,19 @@ die() {
 [ "$(id -u)" -eq 0 ] && die "rode como o usuário 'nixos' da ISO (não como root) — o script usa sudo."
 sudo -v || die "sudo indisponível (a ISO minimal tem sudo sem senha para o usuário nixos)."
 
-# ── 1. habilita flakes (usuário + root) — o que a ISO sempre pede ─────────
+# ── 1. flakes (nix-command + flakes) ──────────────────────────────────────
+# Nix >= 2.24 (NixOS 24.11+) já habilita nix-command/flakes por padrão, mas
+# a config do usuário não custa nada e cobre ISOs mais antigas.
 say "Habilitando flakes (nix-command + flakes)"
 mkdir -p ~/.config/nix
 grep -q "experimental-features" ~/.config/nix/nix.conf 2>/dev/null \
   || echo "experimental-features = nix-command flakes" >>~/.config/nix/nix.conf
-# sudo não herda a config do usuário; escreve também a do root (/etc/nix).
-sudo sh -c 'mkdir -p /etc/nix; grep -q experimental-features /etc/nix/nix.conf 2>/dev/null \
-  || echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf'
+# ⚠️ NÃO escrever /etc/nix/nix.conf: na ISO minimal o /etc é squashfs
+# READ-ONLY (causa do erro "read-only file system" das versões antigas).
+# sudo não herda a config do usuário, então os comandos nix do root
+# recebem as features via NIX_CONFIG (`sudo env` limpo de herança) — e isso
+# propaga para o nixos-install que o disko-install roda internamente.
+ROOT_NIX=(sudo env "NIX_CONFIG=experimental-features = nix-command flakes" nix)
 
 # ── 2. ferramentas da TUI ─────────────────────────────────────────────────
 say "Baixando git e gum (interface da TUI)"
@@ -163,7 +168,7 @@ INSTALL_ARGS=(
 if [ -n "$AGEKEY" ] && [ -f "$AGEKEY" ]; then
   INSTALL_ARGS+=(--extra-files "$AGEKEY" "home/$USERNAME/.config/sops/age/keys.txt")
 fi
-sudo nix run 'github:nix-community/disko/latest#disko-install' -- "${INSTALL_ARGS[@]}"
+"${ROOT_NIX[@]}" run 'github:nix-community/disko/latest#disko-install' -- "${INSTALL_ARGS[@]}"
 
 # ── 8. finalização ────────────────────────────────────────────────────────
 gum style --foreground 212 --bold \

@@ -47,7 +47,9 @@ opcional de uma chave age para já deixar o sops-nix pronto).
 
 O script então:
 
-1. habilita `nix-command flakes` no usuário **e** no root (o que a ISO sempre pede);
+1. garante `nix-command flakes` para o usuário e passa as features para os
+   comandos do root via `NIX_CONFIG` (`sudo env`) — o `/etc/nix` da ISO é
+   **somente leitura**, então o script não o altera;
 2. instala `git` + `gum` via nix;
 3. gera `hosts/<host>/hardware-configuration.nix`
    (`nixos-generate-config --show-hardware-config --no-filesystems` — sem
@@ -110,9 +112,10 @@ nix run nixpkgs#nixos-anywhere -- \
 
 | Sintoma | Causa/correção |
 |---|---|
-| `sudo nix ...` reclama de features experimentais | o script escreve `/etc/nix/nix.conf`; se rodar comandos à mão, use `sudo nix --extra-experimental-features 'nix-command flakes' ...` (sudo não herda a config do usuário). |
+| `sudo nix ...` reclama de features experimentais | o script usa `sudo env NIX_CONFIG=...` (o `/etc/nix` da ISO é read-only); à mão, use `sudo nix --extra-experimental-features 'nix-command flakes' ...`. |
+| `sh: /etc/nix/nix.conf: read-only file system` | esperado na ISO (squashfs) — era um bug de versões antigas do script que tentavam escrever lá; rode a versão atual, que usa `NIX_CONFIG`. |
 | `git: command not found` | a ISO minimal não traz git; o script instala via `nix profile install nixpkgs#git`. |
 | "host 'daily' ... BIOS" | boote a ISO em UEFI (ou ajuste o disko para GRUB). |
 | "host 'server' ... UEFI" | use o fluxo remoto (nixos-anywhere) ou adicione ESP no disko do server. |
-| Clone falha na rede corporativa | configure proxy em `/etc/nix/nix.conf` e use `git config http.proxy`. |
+| Clone falha na rede corporativa | na ISO o `/etc/nix` é read-only: use `NIX_CONFIG` (ou `~/.config/nix/nix.conf`) para o proxy do Nix e `git config http.proxy`. |
 | Esqueceu a senha | boot da ISO de novo → `disko-install --mode mount --flake .#host --disk main <by-id>` monta sem formatar; ou use `nixos-enter` e `passwd`. |
