@@ -11,15 +11,12 @@
       <property name="size" type="uint" value="36"/>
       <property name="plugin-ids" type="array">
         <value type="int" value="1"/>
-        <value type="int" value="12"/>
         <value type="int" value="9"/>
-        <value type="int" value="13"/>
-        <value type="int" value="2"/>
-        <value type="int" value="14"/>
-        <value type="int" value="7"/>
         <value type="int" value="15"/>
         <value type="int" value="19"/>
+        <value type="int" value="21"/>
         <value type="int" value="5"/>
+        <value type="int" value="20"/>
         <value type="int" value="16"/>
         <value type="int" value="6"/>
       </property>
@@ -63,27 +60,12 @@
       <property name="digital-time-format" type="string" value="%R"/>
       <property name="digital-time-font" type="string" value="JetBrains Mono 10"/>
     </property>
-    <property name="plugin-2" type="string" value="launcher">
-      <property name="items" type="array">
-        <value type="string" value="17885263881.desktop"/>
-      </property>
-    </property>
-    <property name="plugin-7" type="string" value="launcher">
-      <property name="items" type="array">
-        <value type="string" value="17885264493.desktop"/>
-      </property>
-      <property name="show-label" type="bool" value="false"/>
-      <property name="disable-tooltips" type="bool" value="true"/>
-    </property>
     <property name="plugin-9" type="string" value="pager">
       <property name="rows" type="uint" value="1"/>
       <property name="miniature-view" type="bool" value="false"/>
       <property name="numbering" type="bool" value="false"/>
       <property name="workspace-scrolling" type="bool" value="false"/>
     </property>
-    <property name="plugin-12" type="string" value="separator"/>
-    <property name="plugin-13" type="string" value="separator"/>
-    <property name="plugin-14" type="string" value="separator"/>
     <property name="plugin-15" type="string" value="separator"/>
     <property name="plugin-16" type="string" value="separator"/>
     <property name="plugin-19" type="string" value="tasklist">
@@ -97,5 +79,9 @@
       <property name="show-only-minimized" type="bool" value="false"/>
       <property name="include-all-workspaces" type="bool" value="false"/>
     </property>
+    <property name="plugin-20" type="string" value="pulseaudio">
+      <property name="enable-keyboard-shortcuts" type="bool" value="true"/>
+    </property>
+    <property name="plugin-21" type="string" value="separator"/>
   </property>
 </channel>

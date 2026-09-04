@@ -2,9 +2,9 @@
 #
 # Os XMLs em ./xfce/ são o formato do xfconf (banco de configurações do
 # XFCE) e o home-manager os coloca em
-# ~/.config/xfce4/xfconf/xfce-perchannel-xml/. Além deles, gerenciamos os
-# launchers do painel (./xfce/panel/), o wallpaper (./xfce/backgrounds/) e
-# o helpers.rc do exo (terminal padrão).
+# ~/.config/xfce4/xfconf/xfce-perchannel-xml/. Além deles, gerenciamos o
+# wallpaper (./xfce/backgrounds/), o script do Super+Return
+# (./xfce/xfce-wezterm.sh) e o helpers.rc do exo (terminal padrão).
 #
 # ⚠️ Config declarativa: mudanças feitas pela GUI do XFCE são sobrescritas
 # no próximo `switch`. Fluxo para trazer mudanças da GUI para cá:
@@ -58,14 +58,6 @@ in
     # Wallpaper gerenciado (o xfce4-desktop.xml aponta para cá — assim o
     # caminho não depende de hash do /nix/store nem de pacote instalado).
     ".config/xfce4/backgrounds/xfce-blue.jpg".source = ./xfce/backgrounds/xfce-blue.jpg;
-
-    # Launchers do painel (plugin launcher-2 = WezTerm, launcher-7 =
-    # Firefox). Sem eles, os ícones do painel não funcionam em instalação
-    # nova.
-    ".config/xfce4/panel/launcher-2/17885263881.desktop".source =
-      ./xfce/panel/launcher-2/17885263881.desktop;
-    ".config/xfce4/panel/launcher-7/17885264493.desktop".source =
-      ./xfce/panel/launcher-7/17885264493.desktop;
 
     # Keybind Super+Return: abre/foca o wezterm (ver ./xfce/xfce-wezterm.sh).
     ".local/bin/xfce-wezterm.sh".source = ./xfce/xfce-wezterm.sh;

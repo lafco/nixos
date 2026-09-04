@@ -16,14 +16,10 @@ cd "$(dirname "$0")/.."
 LIVE="$HOME/.config/xfce4"
 REPO="home/modules/xfce"
 
-mkdir -p "$REPO/panel/launcher-2" "$REPO/panel/launcher-7" "$REPO/backgrounds"
+mkdir -p "$REPO/backgrounds"
 
 # Canais xfconf (só *.xml — ignora os backups .hm-backup do home-manager).
 cp "$LIVE"/xfconf/xfce-perchannel-xml/*.xml "$REPO"/
-
-# Launchers do painel.
-cp "$LIVE"/panel/launcher-2/*.desktop "$REPO/panel/launcher-2/" 2>/dev/null || true
-cp "$LIVE"/panel/launcher-7/*.desktop "$REPO/panel/launcher-7/" 2>/dev/null || true
 
 # Wallpaper gerenciado.
 bg=$(grep -o '<property name="last-image" type="string" value="[^"]*"' "$REPO/xfce4-desktop.xml" | sed 's/.*value="//;s/"$//')
