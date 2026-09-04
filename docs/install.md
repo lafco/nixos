@@ -8,8 +8,16 @@ hardware-configuration, particionamento e instalação) é automático.
 
 A ISO precisa alcançar este repo de alguma forma:
 
-- **A. GitHub/GitLab (recomendado):** suba o repo (`git push`) e use a URL
+- **A. GitHub (recomendado):** suba o repo (`git push`) e use a URL
   pública. É a opção mais simples de manter.
+
+O script clona **`https://github.com/lafco/nixos` por padrão** (sem
+perguntar a URL); se o repo estiver em outro lugar (mirror corporativo,
+clone local), sobrescreva na hora de rodar:
+
+```sh
+REPO_URL=https://seu-mirror/lafco/nixos sh <(curl -L <URL-do-script>/install/install-iso.sh)
+```
 - **B. Rede local:** na máquina com o repo:
   ```sh
   cd ~/dotfiles && git update-server-info && python3 -m http.server 8000

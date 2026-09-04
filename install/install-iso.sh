@@ -7,8 +7,8 @@
 # disko-install formata, monta e instala → reboot.
 #
 # Como obter o script na ISO (qualquer uma):
-#   A) Repo no GitHub/GitLab:
-#        sh <(curl -L https://raw.githubusercontent.com/USER/dotfiles/main/install/install-iso.sh)
+#   A) Repo no GitHub:
+#        sh <(curl -L https://raw.githubusercontent.com/lafco/nixos/main/install/install-iso.sh)
 #   B) Repo servido na rede local (nesta máquina):
 #        cd <repo> && git update-server-info && python3 -m http.server 8000
 #        # na ISO:
@@ -16,7 +16,8 @@
 #   C) Repo num pendrive: rode o script direto do pendrive
 #        sh /media/pendrive/install/install-iso.sh   (detecta o repo ao lado)
 #
-# Detalhes: docs/install.md
+# O script clona github:lafco/nixos por padrão; sobrescreva com REPO_URL=
+# (ex.: mirror corporativo). Detalhes: docs/install.md
 # ═══════════════════════════════════════════════════════════════════════════
 set -euo pipefail
 
@@ -57,11 +58,18 @@ if [ -f "$SCRIPT_DIR/../flake.nix" ]; then
   REPO_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
   echo "Repo encontrado ao lado do script (modo USB/local): $REPO_DIR"
 else
-  url="${REPO_URL:-}"
-  [ -z "$url" ] && url=$(gum input --placeholder "URL do repo para git clone (ex.: https://github.com/voce/dotfiles) — Enter cancela")
-  [ -z "$url" ] && die "sem repo. Veja as opções A/B/C no cabeçalho deste script."
+  # Repo fixo — sempre este repo (lafco/nixos). REPO_URL existe só para
+  # sobrescrever (ex.: mirror corporativo, clone local na rede).
+  url="${REPO_URL:-https://github.com/lafco/nixos}"
   REPO_DIR="$HOME/dotfiles"
-  git clone "$url" "$REPO_DIR"
+  if [ -d "$REPO_DIR/.git" ]; then
+    say "Repo já clonado em $REPO_DIR — atualizando"
+    git -C "$REPO_DIR" pull --ff-only || die "git pull falhou em $REPO_DIR."
+  else
+    say "Clonando $url"
+    git clone "$url" "$REPO_DIR" \
+      || die "git clone de $url falhou. Se o repo não for acessível dessa URL, defina REPO_URL (ex.: http://IP:8000 para um clone servido na rede local)."
+  fi
 fi
 cd "$REPO_DIR"
 
