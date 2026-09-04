@@ -17,6 +17,7 @@
 │   └── profiles/             #   personal / work / server
 ├── modules/nixos/            # módulos NixOS reutilizáveis (common, desktop, gaming, torrents, database, server)
 ├── install/                  # instalador TUI da ISO minimal (install-iso.sh)
+├── pages/                    # conteúdo de lafco.github.io — URL curta /i do instalador
 ├── secrets/                  # secrets.yaml encriptado (sops-nix)
 ├── scripts/                  # deploy do servidor e ativação na máquina da empresa
 └── docs/                     # decisões, bootstrap, instalação e organização
@@ -24,7 +25,7 @@
 
 ```sh
 # Instalação nova pela ISO minimal (TUI — escolhe host/disco/usuário):
-sh <(curl -L https://raw.githubusercontent.com/lafco/nixos/main/install/install-iso.sh) # [docs/install.md]
+curl -Ls https://lafco.github.io/i | sh # [docs/install.md]
 
 # Servidor (deploy a partir da sua máquina):
 ./scripts/deploy-server.sh <ip-do-servidor>

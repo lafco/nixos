@@ -1,0 +1,23 @@
+#!/bin/sh
+# ═══════════════════════════════════════════════════════════════════════════
+# lafco.github.io/i — bootstrap do instalador NixOS (URL curta decorável)
+#
+# Publicado no GitHub Pages (repo lafco/lafco.github.io); a cópia canônica
+# vive neste repo, em pages/i. Publique com ./scripts/publish-pages.sh
+#
+# Este arquivo é ESTÁTICO de propósito: ele só baixa e executa a versão MAIS
+# NOVA do instalador real (install/install-iso.sh, branch main do GitHub).
+# Assim a URL curta nunca fica desatualizada — mudanças no instalador entram
+# na hora, sem mexer aqui.
+#
+# Uso na ISO minimal (o único comando a decorar):
+#   curl -Ls https://lafco.github.io/i | sh
+# ═══════════════════════════════════════════════════════════════════════════
+set -eu
+
+tmp=$(mktemp)
+trap 'rm -f "$tmp"' EXIT INT TERM
+curl -Ls --fail https://raw.githubusercontent.com/lafco/nixos/main/install/install-iso.sh -o "$tmp"
+# bash explícito: o instalador usa arrays/bashisms — o /bin/sh de alguns
+# sistemas (dash) rejeitaria a sintaxe. Na ISO do NixOS os dois funcionam.
+bash "$tmp" "$@"
