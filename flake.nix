@@ -36,6 +36,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Extensões do Firefox rastreadas pelo AMO (repo do rycee, o mesmo citado
+    # na doc do home-manager). Expõe o overlay `firefox-addons`, aplicado em
+    # lib/overlays.nix → `pkgs.firefox-addons.*` (ver home/modules/apps.nix).
+    # Atualização: `nix flake update firefox-addons`.
+    firefox-addons = {
+      url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # ══ Lix (alternativa ao Nix oficial) ═══════════════════════════════
     # Se preferir o Lix (fork comunitário), descomente e adicione o módulo
     # abaixo à lista `modules` de cada host. É drop-in: o resto não muda.
@@ -48,7 +57,7 @@
   };
 
   outputs =
-    inputs @ {
+    inputs@{
       self,
       nixpkgs,
       home-manager,

@@ -1,6 +1,10 @@
 # Overlays compartilhados entre os hosts NixOS e o home-manager standalone.
 { inputs }:
 [
+  # Extensões do Firefox (uBlock Origin) vindas do AMO — consumidas por
+  # home/modules/apps.nix como pkgs.firefox-addons.<nome>.
+  inputs.firefox-addons.overlays.default
+
   # Pacotes do unstable acessíveis como pkgs.unstable.* (usado por
   # home/modules/ai.nix: pi-coding-agent, herdr).
   (

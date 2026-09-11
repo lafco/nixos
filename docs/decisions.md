@@ -137,3 +137,104 @@ de dev. Avaliação:
 
 **Decisão**: não adotar neste repo. **Reconsiderar** apenas como padrão por projeto
 (na máquina da empresa/daily), nunca como substituto do devShell do repo.
+
+## 6. Extensões do Firefox: overlay `firefox-addons` + bloqueio de YouTube Shorts
+
+### Fonte das extensões: overlay rastreado pelo AMO (não hashes à mão)
+
+Até set/2026 o `home/modules/apps.nix` fixava cada extensão com
+`pkgs.fetchFirefoxAddon { url = "…/file/<id>/<slug>-<versão>.xpi"; sha256 = …; }`.
+Isso amarra URL **e** hash ao arquivo do addons.mozilla.org, exige edição manual
+a cada bump e ainda reescreve o `gecko.id` do manifesto para `nixos@<nome>`
+(o que faz o Firefox usar um ID que não é o do AMO).
+
+Alternativa adotada: o flake input
+[`gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons`](https://gitlab.com/rycee/nur-expressions/-/tree/master/pkgs/firefox-addons)
+— o mesmo overlay citado na documentação do home-manager. Ele expõe
+`overlays.default`, aplicado em `lib/overlays.nix`, e mantém
+`pkgs.firefox-addons.<nome>` com versão + hash no `flake.lock`
+(atualização via `nix flake update firefox-addons`).
+
+- O ID canônico vem do `passthru.addonId` do pacote (nesse overlay) ou do
+  `passthru.extid` do `fetchFirefoxAddon` do nixpkgs — `apps.nix` aceita os
+  dois via `... .extid or ... .addonId`. Assim o uBO passa a ser
+  `uBlock0@raymondhill.net` (ID real do AMO) em vez de `nixos@ublock-origin`.
+- O repositório `nix-community/nixpkgs-firefox-addons` **não existe** (404 na
+  API do GitHub, verificado em set/2026) — não é o overlay do home-manager.
+- As três extensões usadas aqui (uBlock Origin, Proton Pass, Pywalfox) estão no
+  overlay, nas mesmas versões que estavam pinadas à mão.
+
+### `fetchFirefoxAddon` era incompatível com `extensions.packages` (3 bugs)
+
+A configuração anterior (2026-08) usava `pkgs.fetchFirefoxAddon` para as três
+ extensões. Verificado em set/2026, isso produzia **três** problemas:
+
+1. **Nenhuma extensão era instalada.** O `fetchFirefoxAddon` deixa o `.xpi` na
+   raiz do pacote (`$out/nixos@<nome>.xpi`), mas o módulo do home-manager copia
+   `<pkg>/share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}` para
+   `<perfil>/extensions`. O buildEnv resultante não tinha `share/`, então o
+   home-manager criava um symlink **pendurado** e o Firefox carregava zero
+   extensões (`extensions.json` só listava addons nativos).
+2. **IDs falsos.** O builder reescreve o `gecko.id` do manifesto para
+   `nixos@<nome>`. Native messaging (Proton Pass ↔ app desktop, Pywalfox ↔
+   CLI), Sync e o `install_url` do AMO esperam o ID real — então as integrações
+   não funcionariam nem se a instalação tivesse dado certo.
+3. **`home.packages` levava o xpi no lugar do app desktop.** O binding
+   `proton-pass` no `let` do `apps.nix` sombreava o `pkgs.proton-pass` do
+   `with pkgs`, então o pacote instalado era a extensão, não o app. Por isso os
+   bindings das extensões agora têm sufixo `-extension`.
+
+A migração para o overlay resolve os três: o `buildMozillaXpiAddon` do
+rycee/nur-expressions instala em
+`share/mozilla/extensions/{ec8030f7-…}/<id-real>.xpi` e **não** toca no
+manifesto.
+
+### Bloqueio de YouTube Shorts: filtros do uBO + `userContent.css`
+
+Duas camadas declarativas, porque uma só não cobre os dois modos de falha:
+
+1. **Filtros do uBO** (`user-filters`): bloqueiam a navegação para
+   `/shorts/` (`||youtube.com/shorts/$document`) e escondem as prateleiras e
+   entradas de Shorts no feed/sidebar/barra do mobile.
+2. **`userContent.css`** (pref `toolkit.legacyUserProfileCustomizations.stylesheets`):
+   esconde a mesma UI por CSS, cobrindo a janela em que o uBO ainda não carregou
+   as listas (primeira execução, listas desatualizadas).
+
+Detalhes que motivaram a implementação:
+
+- O uBO guarda "My filters" em `storage.local` sob a chave **`user-filters`**
+  (`µb.userFiltersPath` em `assets.js`), não `userFilters` — usar a chave errada
+  gravava o valor e o uBO simplesmente ignorava.
+- `programs.firefox.profiles.<p>.extensions.settings` é a via declarativa do
+  home-manager (`browser-extension-data/<id>/storage.js`). Exige `force = true`
+  (o módulo substitui o `storage.local` inteiro da extensão) e tem como efeito
+  colateral desligar `extensions.webextensions.ExtensionStorageIDB.enabled` para
+  o perfil.
+  - Alternativa avaliada (**não** usada): managed storage via
+    `policies."3rdparty".Extensions.<id>.{adminSettings,toOverwrite}`, que é
+    não destrutiva (o uBO mescla no startup). Fica como plano B se algum dia
+    incomodar o `force = true`.
+- Extensão de terceiros tipo "YouTube Shorts Block" via
+  `ExtensionSettings.<id>.install_url` foi descartada: instalação em runtime,
+  sem hash pinado e com o caminho sendo restringido pela Mozilla.
+- Bloqueio por DNS/hosts/Pi-hole foi descartado: o requisito é por site, não de
+  rede, e o repo não tem camada de DNS.
+- `extensions.autoDisableScopes = 0` é necessário porque as extensões em
+  `<perfil>/extensions` entram como *sideload* e, sem isso, o Firefox exige
+  habilitação manual na primeira execução (perde-se o "já vem configurado").
+
+**Decisão**: overlay para a origem dos três addons; Shorts por filtros do uBO
+(`user-filters`) + `userContent.css`. Manutenção: `nix flake update
+firefox-addons` de vez em quando e revisão dos seletores CSS quando o YouTube
+mudar o DOM (os filtros do uBO são a camada que de fato bloqueia).
+
+> Nota operacional: se a ativação falhar com
+> `mkdir: cannot create directory '<perfil>/extensions': File exists`, é o
+> symlink pendurado deixado pela config antiga. O `cleanOldGen` do home-manager
+> não o remove (o caminho relativo existe como diretório na geração nova),
+> então é preciso tirar o symlink do caminho na mão (`mv` para fora do perfil)
+> e reativar. Aconteceu uma vez, na migração.
+
+Referências: [home-manager — Firefox](https://nix-community.github.io/home-manager/options.xhtml#opt-programs.firefox.profiles._name_.extensions.settings),
+[uBO — Dashboard: My filters](https://github.com/gorhill/uBlock/wiki/Dashboard:-My-filters),
+[uBO — Managed storage](https://github.com/gorhill/uBlock/wiki/Managed-storage).
