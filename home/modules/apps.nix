@@ -78,6 +78,10 @@ in
     # O updater interno é desativado pelo overlay: o AppImage fica imutável no
     # /nix/store e novas versões são aplicadas pelo flake/Nix.
     ankama-launcher # jogos Ankama (Dofus, Waven, Wakfu…) — AppImage + wine
+    # Launcher de jogos (catálogo/torrent); AppImage do nixpkgs (MIT, free).
+    # Como o AppImage é extraído pro /nix/store, o updater interno do Hydra
+    # pode reclamar — novas versões entram pelo flake (`nix flake update`).
+    hydralauncher
   ];
 
   # Player de vídeo com aceleração de hardware na RX 7600 (VAAPI)
