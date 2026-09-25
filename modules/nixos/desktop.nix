@@ -1,5 +1,9 @@
-# Ambiente gráfico da máquina de uso diário: XFCE + SDDM + PipeWire +
+# Ambiente gráfico da máquina de uso diário: GNOME + XFCE + GDM + PipeWire +
 # Bluetooth + fontes.
+#
+# Os dois desktops convivem no mesmo host: o GDM lista as sessões "GNOME"
+# (Wayland, padrão) e "Xfce Session" no seletor de login. A config de cada um
+# mora em home/modules/gnome.nix e home/modules/xfce.nix.
 { pkgs, ... }:
 {
   services.xserver = {
@@ -9,9 +13,15 @@
     # videoDrivers = [ "nvidia" ];
   };
 
-  # SDDM como display manager (o LightDM foi removido do nixpkgs em 2025).
-  services.displayManager.sddm.enable = true;
-  services.displayManager.defaultSession = "xfce";
+  # GNOME 50 é Wayland-only (a sessão Xorg saiu no 49). O módulo do nixpkgs
+  # recomenda o GDM: com outro display manager a sessão Wayland não funciona
+  # direito e o lock de tela (Super+L) não trava.
+  services.desktopManager.gnome.enable = true;
+
+  # GDM substitui o SDDM (só um display manager por host; o LightDM foi
+  # removido do nixpkgs em 2025). Ele lista as duas sessões; GNOME é a padrão.
+  services.displayManager.gdm.enable = true;
+  services.displayManager.defaultSession = "gnome";
 
   networking.networkmanager.enable = true;
 
@@ -66,6 +76,20 @@
     xfce4-docklike-plugin # taskbar estilo dock (pin de apps)
     xfce4-clipman-plugin # histórico de clipboard
     xfce4-genmon-plugin # monitor genérico (scripts custom)
+
+    # Tray do GNOME: o painel do XFCE tem systray embutido, mas o GNOME Shell
+    # não mostra ícones de bandeja (blueman etc.) sem esta extensão. Ela é
+    # habilitada via dconf em home/modules/gnome.nix.
+    gnomeExtensions.appindicator
+
+    # Fixa apps em áreas de trabalho (wezterm -> 1, firefox -> 2, steam -> 3).
+    # Configurada em home/modules/gnome.nix; exige áreas estáticas.
+    gnomeExtensions.auto-move-windows
+
+    # Dock estilo macOS (auto-hide, embaixo), mantendo a top bar. Configurada
+    # em home/modules/gnome.nix (com hot-keys = false, senão Super+1..9 briga
+    # com os binds de área de trabalho).
+    gnomeExtensions.dash-to-dock
     # alacritty
     # vlc
   ];

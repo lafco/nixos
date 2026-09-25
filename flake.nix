@@ -1,5 +1,5 @@
 {
-  description = "Config declarativa: NixOS daily (XFCE), servidor headless e home-manager para a máquina da empresa (dotfiles em lafco/config)";
+  description = "Config declarativa: NixOS daily (GNOME + XFCE), servidor headless e home-manager para a máquina da empresa (dotfiles em lafco/config)";
 
   inputs = {
     # NixOS estável 26.05
@@ -83,7 +83,7 @@
       };
     in
     {
-      # ── Máquina de uso diário (NixOS + XFCE) ───────────────────────
+      # ── Máquina de uso diário (NixOS + GNOME/XFCE) ────────────────
       nixosConfigurations.daily = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = { inherit inputs; };

@@ -1,4 +1,4 @@
-# Máquina de USO DIÁRIO — NixOS + XFCE.
+# Máquina de USO DIÁRIO — NixOS + GNOME/XFCE (GDM escolhe a sessão).
 { pkgs, lib, ... }:
 {
   # local.nix é opcional e específico da máquina (gerado pelo instalador da

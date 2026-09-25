@@ -7,13 +7,14 @@
 ├── treefmt.nix               # `nix fmt` (nixfmt + shfmt)
 ├── .sops.yaml                # chaves dos segredos (sops-nix/age)
 ├── hosts/                    # máquinas NixOS
-│   ├── daily/                #   desktop XFCE
+│   ├── daily/                #   desktop GNOME + XFCE
 │   └── server/               #   servidor headless
 ├── home/                     # configuração do usuário (home-manager)
 │   ├── lafco/                #   core do usuário (importa home/modules/)
 │   ├── modules/              #   módulos HM: dotfiles (symlinks), shell, git,
 │   │                         #   editor, terminal, dev (runtimes), ai, apps,
-│   │                         #   xfce (painel/keybinds/ícones)
+│   │                         #   gnome (keybinds/aparência) e xfce
+│   │                         #   (painel/keybinds/ícones)
 │   └── profiles/             #   personal / work / server
 ├── modules/nixos/            # módulos NixOS reutilizáveis (common, desktop, gaming, torrents, database, server)
 ├── install/                  # instalador TUI da ISO minimal (install-iso.sh)
