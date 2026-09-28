@@ -80,6 +80,24 @@ in
     ankama-launcher # jogos Ankama (Dofus, Waven, Wakfu…) — AppImage + wine
   ];
 
+  # Início automático no login. GNOME e XFCE leem o mesmo
+  # $XDG_CONFIG_HOME/autostart (spec XDG), então uma entrada serve às duas
+  # sessões.
+  #
+  # O Proton Pass tem um toggle "Launch at startup" na UI, mas ele chama
+  # app.setLoginItemSettings() do Electron — que no Linux é no-op. Verificado
+  # com o Electron 43 do próprio pacote: depois de `setLoginItemSettings({openAtLogin: true})`
+  # o `getLoginItemSettings().openAtLogin` continua false e nada é criado em
+  # ~/.config/autostart. Por isso a entrada é declarada aqui.
+  #
+  # `entries` aponta para o .desktop do pacote em vez de uma cópia escrita à
+  # mão: nada para manter em sincronia com o upstream, e o `Exec=proton-pass %U`
+  # já resolve no PATH do perfil.
+  xdg.autostart = {
+    enable = true;
+    entries = [ "${pkgs.proton-pass}/share/applications/proton-pass.desktop" ];
+  };
+
   # Player de vídeo com aceleração de hardware na RX 7600 (VAAPI)
   programs.mpv = {
     enable = true;
