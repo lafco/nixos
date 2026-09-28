@@ -4,7 +4,7 @@
 
 | Caminho | O que é |
 |---|---|
-| `flake.nix` | Entrada única. Declara inputs (nixpkgs, home-manager, sops-nix, disko, treefmt) e os três alvos: `nixosConfigurations.daily`, `nixosConfigurations.server`, `homeConfigurations."lafco@work"`. |
+| `flake.nix` | Entrada única. Declara inputs (nixpkgs, home-manager, sops-nix, disko, treefmt, firefox-addons, spicetify-nix) e os três alvos: `nixosConfigurations.daily`, `nixosConfigurations.server`, `homeConfigurations."lafco@work"`. |
 | `hosts/<maquina>/default.nix` | Config específica da máquina NixOS (hostname, usuário, bootloader, segredos). Importa o `hardware-configuration.nix` e o `disko-config.nix` da mesma pasta. |
 | `hosts/<maquina>/hardware-configuration.nix` | GERADO por máquina (drives/rede/firmware). Substitua o stub pelo arquivo real — o instalador da ISO faz isso por você. |
 | `hosts/<maquina>/disko-config.nix` | Layout de disco declarativo (usado pelo disko na instalação). |
@@ -13,7 +13,7 @@
 | `modules/nixos/` | Módulos NixOS reutilizáveis: `common.nix` (tudo que é igual em daily e server), `desktop.nix` (GNOME + XFCE via GDM, só daily), `gaming.nix` (Steam/GameMode, só daily), `torrents.nix` (qBittorrent headless + Prowlarr em localhost, só daily), `database.nix` (Postgres local, só daily), `server.nix` (endurecimento SSH, só server). |
 | `lib/` | Helpers (`default.nix`) e `overlays.nix`: `pkgs.unstable.*` (pi/herdr, do nixpkgs-unstable). |
 | `home/lafco/` | Core do usuário em home-manager. Importa os módulos LOCAIS de `home/modules/` (antes eles vinham do repo de dotfiles, que hoje é só stow + CLI `dot`): `dotfiles.nix` (symlinks), `shell.nix`, `git.nix`, `editor.nix`, `terminal.nix` — mais o `ssh.nix` local. |
-| `home/modules/` | Módulos home-manager do usuário (vendored do antigo `nixos/modules/home/` do repo de dotfiles): `dotfiles.nix` (symlinks para `~/dotfiles`), `shell.nix`, `git.nix`, `editor.nix`, `terminal.nix`, `dev.nix` (runtimes: rust, node, deno, bun, python, cliente postgres), `ai.nix`, `apps.nix`, `gnome.nix` (keybinds, aparência, áreas de trabalho, pinning de apps e extensões — tray e dock — do GNOME via dconf), `xfce.nix` (painel, keybinds e tema de ícones Papirus do XFCE, XML do xfconf em `home/modules/xfce/`). |
+| `home/modules/` | Módulos home-manager do usuário (vendored do antigo `nixos/modules/home/` do repo de dotfiles): `dotfiles.nix` (symlinks para `~/dotfiles`), `shell.nix`, `git.nix`, `editor.nix`, `terminal.nix`, `dev.nix` (runtimes: rust, node, deno, bun, python, cliente postgres), `ai.nix`, `apps.nix`, `spicetify.nix` (Spotify com tema/extensões, via o input `spicetify-nix`), `gnome.nix` (keybinds, aparência, áreas de trabalho, pinning de apps e extensões — tray e dock — do GNOME via dconf), `xfce.nix` (painel, keybinds e tema de ícones Papirus do XFCE, XML do xfconf em `home/modules/xfce/`). |
 | `home/profiles/` | Deltas por máquina: `personal.nix` (daily: + `ai.nix`/`apps.nix`/`gnome.nix`/`xfce.nix` de `home/modules`), `work.nix` (empresa: identidade git do trabalho), `server.nix` (servidor: vazio). Importados DEPOIS do core, então sobrescrevem opções. |
 | `secrets/` | `secrets.yaml` encriptado (sops-nix) — commitável; `.example` é só documentação. |
 | `scripts/` | Atalhos: deploy do servidor e ativação na máquina da empresa. |

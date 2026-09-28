@@ -7,6 +7,7 @@
   imports = [
     ../modules/ai.nix
     ../modules/apps.nix
+    ../modules/spicetify.nix
     ../modules/gnome.nix
     ../modules/xfce.nix
   ];

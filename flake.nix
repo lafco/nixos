@@ -45,6 +45,17 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Spicetify (tema/extensões do Spotify) — o módulo home-manager
+    # `homeManagerModules.spicetify` é importado por home/modules/spicetify.nix.
+    # `follows` evita um segundo nixpkgs no closure (mesmo padrão dos outros
+    # inputs); o upstream é desenvolvido contra o unstable, então se o build
+    # quebrar por incompatibilidade com o estável, remova o `follows`.
+    # Atualização: `nix flake update spicetify-nix`.
+    spicetify-nix = {
+      url = "github:Gerg-L/spicetify-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # ══ Lix (alternativa ao Nix oficial) ═══════════════════════════════
     # Se preferir o Lix (fork comunitário), descomente e adicione o módulo
     # abaixo à lista `modules` de cada host. É drop-in: o resto não muda.
