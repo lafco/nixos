@@ -23,7 +23,7 @@
 
     # Pastas padrão do usuário (XDG user dirs). Music, publicShare e
     # templates ficam desativadas: apontar para $HOME remove o atalho do
-    # Thunar e impede que a pasta seja recriada.
+    # gerenciador de arquivos e impede que a pasta seja recriada.
     userDirs = {
       enable = true;
       createDirectories = true;

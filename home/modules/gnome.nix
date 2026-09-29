@@ -1,14 +1,14 @@
-# GNOME (só na daily): keybinds e aparência espelhando o XFCE
-# (home/modules/xfce.nix e ./xfce/xfce4-keyboard-shortcuts.xml).
+# GNOME (só na daily): keybinds, aparência, áreas de trabalho, pinning de apps
+# e extensões (tray e dock), tudo via dconf.
 #
-# O GNOME não lê xfconf: o equivalente é o dconf, que o home-manager escreve
-# em ~/.config/dconf/user. Como isso é o banco do USUÁRIO, os valores abaixo
-# vencem os defaults do sistema (nixos-gsettings-overrides).
+# O home-manager escreve o dconf em ~/.config/dconf/user. Como isso é o banco
+# do USUÁRIO, os valores abaixo vencem os defaults do sistema
+# (nixos-gsettings-overrides).
 #
 # ⚠️ A sessão do GNOME 50 é Wayland-only (a sessão Xorg saiu no 49). Binds que
 # dependem de X11 (xkill) só afetam clientes XWayland.
 #
-# Equivalências com o xfwm4/commands do XFCE:
+# Keybinds:
 #   Super+Return      -> terminal (wezterm + herdr)   [favorito 1 do dash]
 #   Super+e           -> gerenciador de arquivos (nautilus)  [custom]
 #   Super+f           -> firefox                      [favorito 3 do dash]
@@ -23,10 +23,10 @@
 #   Super+Page_Up/Down         -> trocar de área (já é default)
 #   Alt+Super+Page_Up/Down     -> mover janela de área
 #   Super+l           -> bloquear (já é default do GNOME)
-#   Super+a           -> application finder (xfce4-appfinder); no GNOME o
-#                        default era a grade de apps do overview, que é
-#                        desligada abaixo
-#   Print/Alt+Print   -> screenshot (já é default; não usamos xfce4-screenshooter)
+#   Super+a           -> application finder (xfce4-appfinder, instalado nas
+#                        home.packages abaixo); o default do GNOME era a
+#                        grade de apps do overview, desligada abaixo
+#   Print/Alt+Print   -> screenshot (já é default do GNOME)
 #   Delay/Rate do teclado -> 200ms / 45 repetições por segundo
 #   XF86Audio*        -> volume nativo do GNOME
 #   Super+equal/minus -> volume via wpctl (sem o OSD do GNOME)
@@ -61,7 +61,7 @@
 #
 # O Alt+Tab (app-switcher) é limitado à área atual — o default lista apps de
 # todas as áreas. O Super+Tab (window-switcher) já vem com esse limite.
-{ lib, ... }:
+{ lib, pkgs, ... }:
 let
   # Keybinds de comando. Os binários vêm dos systemPackages do host daily
   # (modules/nixos/desktop.nix) — o GNOME herda o PATH da sessão gráfica.
@@ -175,6 +175,13 @@ let
   '';
 in
 {
+  # O appfinder do Super+a vinha do desktopManager.xfce (removido do repo) —
+  # agora é instalado direto. O Papirus é o icon-theme do GNOME (abaixo).
+  home.packages = [
+    pkgs.xfce4-appfinder
+    pkgs.papirus-icon-theme
+  ];
+
   # .desktop dos jogos da Steam (ver o comentário em steamGames acima) e do
   # wezterm com herdr (ver weztermDesktop).
   xdg.dataFile = gameDesktopEntries // {
@@ -204,7 +211,7 @@ in
       move-to-workspace-4 = [ "<Super><Shift>4" ];
 
       # O default já cobre Super+Shift+Page_Up/Down; aqui somamos o
-      # Alt+Super+Page_Up/Down que o xfwm4 usa.
+      # Alt+Super+Page_Up/Down, herdado da época do xfwm4.
       move-to-workspace-left = [
         "<Super><Shift>Page_Up"
         "<Super><Alt>Page_Up"
@@ -216,9 +223,7 @@ in
     };
 
     # Áreas de trabalho estáticas: a numeração precisa ser estável para o
-    # auto-move-windows (e para os binds Super+1..4) fazerem sentido. São 4 no
-    # GNOME — o XFCE segue com 3 (./xfce/xfwm4.xml: workspace_count = 3), então
-    # Super+4 não existe naquela sessão.
+    # auto-move-windows (e para os binds Super+1..4) fazerem sentido. São 4.
     "org/gnome/mutter" = {
       dynamic-workspaces = false;
     };
@@ -227,7 +232,7 @@ in
     };
 
     "org/gnome/shell/keybindings" = {
-      # Super+1..4 fica para as áreas de trabalho, como no xfwm4 — mas o
+      # Super+1..4 fica para as áreas de trabalho — mas o
       # switch-to-application-N segue sendo o "focar se aberto, senão abrir" do
       # Shell, só com outras teclas: 1 = favorito 1 (wezterm), 3 = favorito 3
       # (firefox), 4 = favorito 4 (spotify); ver favorite-apps abaixo. O 2 fica
@@ -237,7 +242,7 @@ in
       switch-to-application-3 = [ "<Super>f" ];
       switch-to-application-4 = [ "<Super>m" ];
 
-      # Libera Super+a: acima ele volta a ser o appfinder, como no XFCE.
+      # Libera Super+a: acima ele volta a ser o appfinder.
       toggle-application-view = noKeys;
     };
 
@@ -301,7 +306,8 @@ in
       ++ gameAutoMove;
     };
 
-    # Aparência espelhando ./xfce/xsettings.xml.
+    # Aparência do GNOME. cursor-theme e icon-theme eram espelhados do
+    # ./xfce/xsettings.xml na época em que as duas sessões existiam.
     "org/gnome/desktop/interface" = {
       icon-theme = "Papirus-Dark";
       cursor-theme = "Yaru";
@@ -312,16 +318,16 @@ in
       monospace-font-name = "JetBrains Mono 10";
     };
 
-    # Teclado: mesmo Delay/Rate do XFCE (./xfce/keyboards.xml: 200ms e 45/s).
-    # O GNOME guarda o intervalo ENTRE repetições, em ms: 1000/45 ≈ 22ms.
+    # Teclado: 200ms de delay e 45 repetições por segundo (os mesmos valores
+    # que o XFCE usava). O GNOME guarda o intervalo ENTRE repetições, em ms:
+    # 1000/45 ≈ 22ms.
     "org/gnome/desktop/peripherals/keyboard" = {
       delay = lib.gvariant.mkUint32 200;
       repeat-interval = lib.gvariant.mkUint32 22;
     };
 
     # Não suspender nem apagar a tela: a máquina precisa ficar alcançável
-    # (herdr/Tailscale). Mesmo motivo do "inactivity = 0" em
-    # ./xfce/xfce4-power-manager.xml.
+    # (herdr/Tailscale). Mesmo motivo do "inactivity = 0" que existia no XFCE.
     "org/gnome/settings-daemon/plugins/power" = {
       sleep-inactive-ac-type = "nothing";
       sleep-inactive-battery-type = "nothing";

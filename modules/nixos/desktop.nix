@@ -1,14 +1,15 @@
-# Ambiente gráfico da máquina de uso diário: GNOME + XFCE + GDM + PipeWire +
+# Ambiente gráfico da máquina de uso diário: GNOME + GDM + PipeWire +
 # Bluetooth + fontes.
 #
-# Os dois desktops convivem no mesmo host: o GDM lista as sessões "GNOME"
-# (Wayland, padrão) e "Xfce Session" no seletor de login. A config de cada um
-# mora em home/modules/gnome.nix e home/modules/xfce.nix.
+# Só o GNOME é instalado (Wayland-only na versão 50), então o GDM lista uma
+# única sessão. A config do desktop mora em home/modules/gnome.nix.
 { pkgs, ... }:
 {
+  # XWayland vem daqui: Steam, jogos da Steam e o Proton Pass rodam como
+  # clientes X11 sob a sessão Wayland (aparecem na lista de janelas do
+  # XWayland). Não é mais por causa de um desktop X11.
   services.xserver = {
     enable = true;
-    desktopManager.xfce.enable = true;
     # Se um dia usar GPU NVIDIA, descomente:
     # videoDrivers = [ "nvidia" ];
   };
@@ -19,7 +20,7 @@
   services.desktopManager.gnome.enable = true;
 
   # GDM substitui o SDDM (só um display manager por host; o LightDM foi
-  # removido do nixpkgs em 2025). Ele lista as duas sessões; GNOME é a padrão.
+  # removido do nixpkgs em 2025). Ele lista só a sessão GNOME.
   services.displayManager.gdm.enable = true;
   services.displayManager.defaultSession = "gnome";
 
@@ -32,8 +33,9 @@
     pulse.enable = true;
   };
 
-  # Bluetooth (fones, controle de jogo etc.). O blueman dá o applet no
-  # systray do painel (o painel em si é configurado em home/modules/xfce).
+  # Bluetooth (fones, controle de jogo etc.). O blueman é a GUI de pareamento;
+  # no GNOME ele só aparece com a extensão appindicator (habilitada em
+  # home/modules/gnome.nix) — o GNOME Shell não tem systray.
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;
@@ -43,9 +45,9 @@
   # Touchpad/trackpad.
   services.libinput.enable = true;
 
-  # O XFCE ativa services.graphical-desktop, que liga o set padrão de
-  # fontes (DejaVu, Liberation, unifont e Noto CJK/Emoji). Desligamos para
-  # controlar 100% da lista abaixo (Noto fora).
+  # services.graphical-desktop (ligado por services.xserver.enable) ativa o
+  # set padrão de fontes (DejaVu, Liberation, unifont e Noto CJK/Emoji).
+  # Desligamos para controlar 100% da lista abaixo (Noto fora).
   fonts.enableDefaultPackages = false;
 
   fonts.packages = with pkgs; [
@@ -55,7 +57,7 @@
   ];
 
   # Ubuntu Sans como sans-serif padrão do fontconfig: o alias "Sans"
-  # (usado pelo XFCE e apps GTK por padrão) resolve para ela.
+  # (usado por apps GTK e pelo GNOME por padrão) resolve para ela.
   # ⚠️ Noto foi removida — sem fonte de emoji colorido agora; se quiser
   # emojis de volta, adicione p.ex. joypixels ou openmoji aqui.
   fonts.fontconfig.defaultFonts.sansSerif = [ "Ubuntu Sans" ];
@@ -63,23 +65,14 @@
   # Aplicativos gráficos padrão (adicione os seus aqui).
   environment.systemPackages = with pkgs; [
     firefox
-    thunar # file manager GUI (já vem com o XFCE; explícito por clareza)
-    xfce4-screenshooter # usado pelo keybind Print (home/modules/xfce)
-    wezterm # terminal padrão (home/modules/xfce.nix: helpers.rc do exo);
-    # no systemPackages para o exo-open achá-lo no PATH da sessão gráfica
-    # (o home.packages do usuário nem sempre está no PATH do SDDM/XFCE)
-    yaru-theme # cursor "Yaru" do Ubuntu (setado em home/modules/xfce/xsettings.xml)
+    # O gerenciador de arquivos do GNOME é o nautilus, que vem do módulo
+    # desktopManager.gnome — é ele que o Super+e abre (home/modules/gnome.nix).
+    wezterm # terminal padrão; no systemPackages para estar no PATH da sessão
+    # gráfica (o home.packages do usuário nem sempre está no PATH do GDM)
+    yaru-theme # cursor "Yaru" do Ubuntu (setado em home/modules/gnome.nix)
 
-    # Plugins do painel XFCE (adicione pelo GUI: Painel → Add New Items).
-    # O Status Notifier/tray é embutido no xfce4-panel 4.20 (sem pacote).
-    xfce4-whiskermenu-plugin # menu de apps com busca/favoritos
-    xfce4-docklike-plugin # taskbar estilo dock (pin de apps)
-    xfce4-clipman-plugin # histórico de clipboard
-    xfce4-genmon-plugin # monitor genérico (scripts custom)
-
-    # Tray do GNOME: o painel do XFCE tem systray embutido, mas o GNOME Shell
-    # não mostra ícones de bandeja (blueman etc.) sem esta extensão. Ela é
-    # habilitada via dconf em home/modules/gnome.nix.
+    # Tray do GNOME: o GNOME Shell não mostra ícones de bandeja (blueman etc.)
+    # sem esta extensão. Ela é habilitada via dconf em home/modules/gnome.nix.
     gnomeExtensions.appindicator
 
     # Fixa apps em áreas de trabalho (wezterm -> 1, firefox -> 2, steam -> 3).

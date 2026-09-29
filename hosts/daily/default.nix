@@ -1,12 +1,14 @@
-# Máquina de USO DIÁRIO — NixOS + GNOME/XFCE (GDM escolhe a sessão).
+# Máquina de USO DIÁRIO — NixOS + GNOME (sessão Wayland via GDM).
 { pkgs, lib, ... }:
 {
   # local.nix é opcional e específico da máquina (gerado pelo instalador da
   # ISO em install/install-iso.sh; não versionado). Sobrescreve hostname,
   # disco (disko) e usuário/senha locais.
-  imports =
-    [ ./hardware-configuration.nix ./disko-config.nix ]
-    ++ lib.optional (builtins.pathExists ./local.nix) ./local.nix;
+  imports = [
+    ./hardware-configuration.nix
+    ./disko-config.nix
+  ]
+  ++ lib.optional (builtins.pathExists ./local.nix) ./local.nix;
 
   networking.hostName = "daily";
 
@@ -42,15 +44,17 @@
   # as versões declarativas do repositório.
   home-manager.backupFileExtension = "hm-backup";
 
-  # O XFCE reescreve os XMLs do xfconf em runtime, então a cada switch o
-  # arquivo vivo difere do declarativo e um novo .hm-backup seria criado em
-  # cima do anterior (abortando a ativação). Com overwriteBackup, o backup
-  # velho é substituído pelo novo em vez de falhar.
+  # Um .hm-backup já existente é substituído em vez de abortar a ativação.
+  # Era necessário quando o XFCE reescrevia os XMLs do xfconf em runtime;
+  # mantido como rede de segurança para arquivos que a GUI mexe.
   home-manager.overwriteBackup = true;
 
   # Ambiente do usuário (home-manager em modo módulo) + perfil pessoal.
   home-manager.users.lafco = {
-    imports = [ ../../home/lafco ../../home/profiles/personal.nix ];
+    imports = [
+      ../../home/lafco
+      ../../home/profiles/personal.nix
+    ];
   };
 
   # Segredos (sops-nix): só ativa quando secrets/secrets.yaml existir.

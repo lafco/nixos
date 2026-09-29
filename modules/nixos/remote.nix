@@ -31,8 +31,8 @@
   services.fail2ban.enable = true;
 
   # Máquina sempre alcançável: ignora ações de tampa/logind que suspendem.
-  # (A suspensão por inatividade do XFCE é desativada em
-  # home/modules/xfce/xfce4-power-manager.xml.)
+  # (O equivalente no GNOME está em home/modules/gnome.nix:
+  # sleep-inactive-ac-type/sleep-inactive-battery-type = "nothing".)
   services.logind.settings = {
     "Login" = {
       HandleLidSwitch = "ignore";

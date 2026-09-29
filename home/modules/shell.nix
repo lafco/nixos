@@ -16,7 +16,7 @@
     fd
     ripgrep
 
-    # file manager TUI (o thunar continua como GUI no XFCE)
+    # file manager TUI (o GUI do GNOME é o nautilus, que vem do desktopManager)
     xplr
 
     # sistema

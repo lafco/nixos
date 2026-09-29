@@ -80,9 +80,8 @@ in
     ankama-launcher # jogos Ankama (Dofus, Waven, Wakfu…) — AppImage + wine
   ];
 
-  # Início automático no login. GNOME e XFCE leem o mesmo
-  # $XDG_CONFIG_HOME/autostart (spec XDG), então uma entrada serve às duas
-  # sessões.
+  # Início automático no login. O GNOME lê $XDG_CONFIG_HOME/autostart (spec
+  # XDG), então uma entrada basta.
   #
   # O Proton Pass tem um toggle "Launch at startup" na UI, mas ele chama
   # app.setLoginItemSettings() do Electron — que no Linux é no-op. Verificado

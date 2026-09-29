@@ -44,7 +44,7 @@ cd ~/nixos && ./scripts/install-work.sh   # = home-manager switch --flake .#lafc
 - Todo o estado fica em `/nix/store` + seu profile + `~/.config/home-manager`:
   o repo é a única fonte de verdade.
 
-## 2. Máquina pessoal (daily — NixOS + GNOME/XFCE)
+## 2. Máquina pessoal (daily — NixOS + GNOME)
 
 ### Opção A — nixos-anywhere (recomendada, instala tudo por SSH)
 
