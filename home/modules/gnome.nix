@@ -12,13 +12,14 @@
 #   Super+Return      -> terminal (wezterm + herdr)   [favorito 1 do dash]
 #   Super+e           -> gerenciador de arquivos (nautilus)  [custom]
 #   Super+f           -> firefox                      [favorito 3 do dash]
+#   Super+m           -> spotify (área 4)             [favorito 4 do dash]
 #   Super+k           -> xkill                               [custom]
 #   Super+q           -> fechar janela (soma ao Alt+F4 do GNOME)
 #   Super+t           -> fullscreen
 #   Super+Up/Down     -> maximizar/restaurar (já é default do GNOME)
 #   Super+Left/Right  -> ladrilhar (já é default do mutter)
-#   Super+1/2/3       -> áreas de trabalho 1/2/3
-#   Shift+Super+1/2/3 -> mover janela para a área 1/2/3
+#   Super+1..4        -> áreas de trabalho 1..4
+#   Shift+Super+1..4  -> mover janela para a área 1..4
 #   Super+Page_Up/Down         -> trocar de área (já é default)
 #   Alt+Super+Page_Up/Down     -> mover janela de área
 #   Super+l           -> bloquear (já é default do GNOME)
@@ -30,10 +31,11 @@
 #   XF86Audio*        -> volume nativo do GNOME
 #   Super+equal/minus -> volume via wpctl (sem o OSD do GNOME)
 #
-# Além dos keybinds, este módulo fixa 3 áreas de trabalho estáticas e usa a
+# Além dos keybinds, este módulo fixa 4 áreas de trabalho estáticas e usa a
 # extensão auto-move-windows para pinar apps na sua área (wezterm -> 1,
-# firefox -> 2, steam/ankama/jogos -> 3). Exige dynamic-workspaces = false: com
-# áreas dinâmicas os números mudam quando uma área fica vazia.
+# firefox -> 2, steam/ankama/jogos -> 3, spotify -> 4). Exige
+# dynamic-workspaces = false: com áreas dinâmicas os números mudam quando uma
+# área fica vazia.
 #
 # ⚠️ A lista usa o id do .desktop COM o sufixo `.desktop`. A extensão chama
 # Shell.AppSystem.lookup_app(id), que compara com g_app_info_get_id() (o id
@@ -195,9 +197,11 @@ in
       switch-to-workspace-1 = [ "<Super>1" ];
       switch-to-workspace-2 = [ "<Super>2" ];
       switch-to-workspace-3 = [ "<Super>3" ];
+      switch-to-workspace-4 = [ "<Super>4" ];
       move-to-workspace-1 = [ "<Super><Shift>1" ];
       move-to-workspace-2 = [ "<Super><Shift>2" ];
       move-to-workspace-3 = [ "<Super><Shift>3" ];
+      move-to-workspace-4 = [ "<Super><Shift>4" ];
 
       # O default já cobre Super+Shift+Page_Up/Down; aqui somamos o
       # Alt+Super+Page_Up/Down que o xfwm4 usa.
@@ -212,23 +216,26 @@ in
     };
 
     # Áreas de trabalho estáticas: a numeração precisa ser estável para o
-    # auto-move-windows (e para os binds Super+1/2/3) fazerem sentido. São 3,
-    # como no XFCE (./xfce/xfwm4.xml: workspace_count = 3).
+    # auto-move-windows (e para os binds Super+1..4) fazerem sentido. São 4 no
+    # GNOME — o XFCE segue com 3 (./xfce/xfwm4.xml: workspace_count = 3), então
+    # Super+4 não existe naquela sessão.
     "org/gnome/mutter" = {
       dynamic-workspaces = false;
     };
     "org/gnome/desktop/wm/preferences" = {
-      num-workspaces = 3;
+      num-workspaces = 4;
     };
 
     "org/gnome/shell/keybindings" = {
-      # Super+1/2/3 fica para as áreas de trabalho, como no xfwm4 — mas o
+      # Super+1..4 fica para as áreas de trabalho, como no xfwm4 — mas o
       # switch-to-application-N segue sendo o "focar se aberto, senão abrir" do
       # Shell, só com outras teclas: 1 = favorito 1 (wezterm), 3 = favorito 3
-      # (firefox); ver favorite-apps abaixo. O 2 fica vazio.
+      # (firefox), 4 = favorito 4 (spotify); ver favorite-apps abaixo. O 2 fica
+      # vazio.
       switch-to-application-1 = [ "<Super>Return" ];
       switch-to-application-2 = noKeys;
       switch-to-application-3 = [ "<Super>f" ];
+      switch-to-application-4 = [ "<Super>m" ];
 
       # Libera Super+a: acima ele volta a ser o appfinder, como no XFCE.
       toggle-application-view = noKeys;
@@ -253,12 +260,13 @@ in
       ];
 
       # Ordem do dash — é ela que dá o índice do switch-to-application-N (1 =
-      # wezterm, 3 = firefox), por isso a lista é declarativa. O obsidian fica
-      # no meio porque já estava no dash.
+      # wezterm, 3 = firefox, 4 = spotify), por isso a lista é declarativa. O
+      # obsidian fica no meio porque já estava no dash.
       favorite-apps = [
         "org.wezfurlong.wezterm.desktop"
         "obsidian.desktop"
         "firefox.desktop"
+        "spotify.desktop"
       ];
     };
 
@@ -288,6 +296,7 @@ in
         "firefox.desktop:2"
         "steam.desktop:3"
         "ankama-launcher.desktop:3"
+        "spotify.desktop:4"
       ]
       ++ gameAutoMove;
     };
