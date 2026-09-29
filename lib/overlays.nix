@@ -67,9 +67,31 @@
 
         meta = prev.ankama-launcher.meta;
       };
+
+      # Proton Pass: o app é distribuído como .deb versionado e o nixpkgs (tanto
+      # o estável quanto o unstable pinado) fica atrás do upstream. Pinar
+      # version + src aqui é o caminho para pegar correções sem esperar o
+      # nixpkgs. Bump manual:
+      #   1. veja a última versão estável em
+      #      https://proton.me/download/PassDesktop/linux/x64/version.json
+      #      (`jq -r '[.Releases[] | select(.CategoryName == "Stable")] | first | .Version'`);
+      #   2. pegue o hash do deb novo:
+      #      nix store prefetch-file --json --hash-type sha256 \
+      #        https://proton.me/download/pass/linux/x64/proton-pass_<versão>_amd64.deb
+      #   3. atualize `version` e `hash` abaixo.
+      # O layout do deb (usr/lib/proton-pass/resources/app.asar) é o que o
+      # linux.nix do nixpkgs espera, então só o src muda.
+      protonPass = prev.proton-pass.overrideAttrs (old: rec {
+        version = "1.41.1";
+        src = final.fetchurl {
+          url = "https://proton.me/download/pass/linux/x64/proton-pass_${version}_amd64.deb";
+          hash = "sha256-vQLZtWAitEgADCsL43cafWYkZy+uvDO3FGyxd3XmXog=";
+        };
+      });
     in
     {
       ankama-launcher = ankamaLauncher;
+      proton-pass = protonPass;
 
       unstable = import inputs.nixpkgs-unstable {
         system = prev.stdenv.hostPlatform.system;
