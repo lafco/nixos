@@ -39,9 +39,16 @@ in
       beautifulLyrics # letra sincronizada
     ];
 
-    # `wayland` fica no default (null): sem $NIXOS_OZONE_WL no repo, isso deixa
-    # o Spotify em X11/XWayland nas duas sessões (GNOME e XFCE). Para Wayland
-    # nativo no GNOME, `wayland = true` — o XFCE é X11 e usa XWayland de todo
-    # jeito.
+    # EXPERIMENTO — Wayland nativo no GNOME.
+    # `wayland = true` faz o builder embrulhar o binário com
+    # `--ozone-platform=wayland`. O flag é INCONDICIONAL: na sessão XFCE (X11,
+    # sem compositor Wayland) o Spotify não inicia. Enquanto isto estiver
+    # ligado, o Spotify só funciona na sessão do GNOME.
+    #
+    # Motivo: sob XWayland o Spotify é ativado com um round trip de
+    # des-iconificar/repintar do CEF, que é o candidato a atraso no Super+M.
+    # Se não houver ganho perceptível, reverter = `wayland = null` (o default,
+    # que deixa o Chromium escolher sozinho a partir do DISPLAY).
+    wayland = true;
   };
 }
