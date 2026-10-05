@@ -308,10 +308,20 @@ in
 
     # Aparência do GNOME. cursor-theme e icon-theme eram espelhados do
     # ./xfce/xsettings.xml na época em que as duas sessões existiam.
+    #
+    # gtk-theme = Yaru-dark (e não "Adwaita-dark"): o GTK3 procura o nome
+    # LITERAL em share/themes/<nome>, e "Adwaita-dark" não existe mais como
+    # diretório (o GTK3 3.24 traz o Adwaita embutido como recurso, e a variante
+    # escura só sai via GTK_THEME=Adwaita:dark ou
+    # gtk-application-prefer-dark-theme, que o GNOME não liga). Resultado:
+    # apps GTK3 como o xfce4-appfinder (Super+a) caíam no Adwaita claro,
+    # enquanto Shell/nautilus são escuros por color-scheme = prefer-dark.
+    # O Yaru-dark vem do yaru-theme (modules/nixos/desktop.nix), o mesmo
+    # pacote do cursor-theme abaixo.
     "org/gnome/desktop/interface" = {
       icon-theme = "Papirus-Dark";
       cursor-theme = "Yaru";
-      gtk-theme = "Adwaita-dark";
+      gtk-theme = "Yaru-dark";
       color-scheme = "prefer-dark";
       accent-color = "orange";
       font-name = "Ubuntu Sans 10";
