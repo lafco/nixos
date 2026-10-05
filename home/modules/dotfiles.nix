@@ -2,9 +2,6 @@
 # truth em ~/dotfiles. Editar no repo tem efeito imediato (sem rebuild), e o
 # `dot stow` continua funcionando em máquinas não-Nix.
 #
-# Nota: as pastas zed/ e nixos/ foram removidas do repo de dotfiles
-# (2026-09), então os symlinks correspondentes (.config/zed e .config/niri)
-# também saíram daqui.
 { config, ... }:
 let
   repo = "${config.home.homeDirectory}/dotfiles";
@@ -36,5 +33,11 @@ in
     # IA
     ".pi/agent".source = link "pi/.pi/agent";
     ".config/herdr".source = link "herdr/.config/herdr";
+
+    # IDEs
+    ".config/zed/settings.json".source = link "zed/.config/zed/settings.json";
+    ".config/zed/keymap.json".source = link "zed/.config/zed/keymap.json";
+    ".config/Kiro/User/settings.json".source = link "kiro/.config/Kiro/User/settings.json";
+    ".config/Kiro/User/keybindings.json".source = link "kiro/.config/Kiro/User/keybindings.json";
   };
 }

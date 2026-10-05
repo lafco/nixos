@@ -1,5 +1,10 @@
-# Apps de desktop: Firefox (declarativo) + Proton Pass
+# Apps de desktop: Firefox (declarativo) + Proton Pass + IDEs (Zed, Kiro)
 # Firefox: extensões e preferências versionadas; login/sync continua manual (1x).
+#
+# Zed e Kiro são só os PACOTES: settings/keymap/keybindings vêm do repo de
+# dotfiles via symlink (home/modules/dotfiles.nix), não do módulo
+# `programs.zed-editor` do home-manager — ele escreveria o settings.json e
+# brigaria com o symlink.
 { pkgs, ... }:
 let
   # Extensões do Firefox — todas vêm do overlay `firefox-addons`
@@ -74,6 +79,17 @@ in
 {
   home.packages = with pkgs; [
     pkgs.proton-pass # app desktop do Proton Pass (Linux) — NÃO é a extensão
+    # Zed: o nixpkgs do estável (26.05) pinaria 1.3.6, mas o keymap do repo de
+    # dotfiles foi escrito contra o Zed 1.16 (ver o comentário do outline::Toggle
+    # em ~/dotfiles/zed/.config/zed/keymap.json). O unstable traz 1.17.2.
+    # `pkgs.unstable` vem do overlay em lib/overlays.nix.
+    pkgs.unstable.zed-editor # binário: `zeditor`; config em ~/.config/zed -> ~/dotfiles/zed
+    # NÃO usar pkgs.zed: esse é o CLI do data lake da Brim Data
+    # (zed.brimdata.io), não o editor do zed.dev — e é por isso que o binário
+    # do editor se chama `zeditor` no nixpkgs.
+    # IDE da AWS (fork do VS Code). Licença amazonsl (unfree), liberada por
+    # nixpkgs.config.allowUnfree em modules/nixos/common.nix.
+    kiro # config em ~/.config/Kiro/User -> ~/dotfiles/kiro
     obsidian # notas — template de tema disponível no Noctalia
     # O updater interno é desativado pelo overlay: o AppImage fica imutável no
     # /nix/store e novas versões são aplicadas pelo flake/Nix.
