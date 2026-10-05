@@ -26,5 +26,9 @@
 
     # banco de dados (cliente psql; o SERVIDOR fica em modules/nixos/database.nix)
     postgresql
+
+    # dotfiles: no NixOS os symlinks vêm do home-manager (dotfiles.nix); o stow
+    # fica para uso manual e para o CLI `dot` do repo lafco/config.
+    stow
   ];
 }
