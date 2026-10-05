@@ -86,4 +86,23 @@
     # alacritty
     # vlc
   ];
+
+  # O GNOME Web (Epiphany) vem da lista core-apps do módulo
+  # desktopManager.gnome e é o ÚNICO outro browser do sistema. Removido: só o
+  # firefox é usado.
+  environment.gnome.excludePackages = with pkgs; [
+    epiphany
+  ];
+
+  # Browser padrão. Sem um mimeapps.list, o glib (gio, que é o que os apps
+  # chamam para abrir link) resolve text/html e x-scheme-handler/* para o
+  # Epiphany — era por isso que clicar num link abria o GNOME Web, mesmo com o
+  # firefox instalado. Aqui o default fica explícito; o arquivo gerado é
+  # /etc/xdg/mimeapps.list.
+  xdg.mime.defaultApplications = {
+    "text/html" = "firefox.desktop";
+    "application/xhtml+xml" = "firefox.desktop";
+    "x-scheme-handler/http" = "firefox.desktop";
+    "x-scheme-handler/https" = "firefox.desktop";
+  };
 }
