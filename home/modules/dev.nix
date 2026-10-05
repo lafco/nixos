@@ -17,6 +17,7 @@
 
     # javascript/typescript
     nodejs_22
+    pnpm
     deno
     bun
 
