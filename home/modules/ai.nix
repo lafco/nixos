@@ -5,6 +5,7 @@
   home.packages = with pkgs; [
     unstable.pi-coding-agent # pi
     unstable.herdr # AI workspace manager
+    pkgs.opencode-v2 # OpenCode v2 (binários `opencode` e `opencode2`)
   ];
 
   # herdr "always-on": server headless sob o systemd user, iniciando no boot

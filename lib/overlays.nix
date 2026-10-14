@@ -93,6 +93,10 @@
       ankama-launcher = ankamaLauncher;
       proton-pass = protonPass;
 
+      # OpenCode v2 (binário pré-compilado do npm oficial) — o nixpkgs só tem a
+      # série 1.x. Consumido por home/modules/ai.nix. Ver pkgs/opencode-v2.nix.
+      opencode-v2 = final.callPackage ../pkgs/opencode-v2.nix { };
+
       unstable = import inputs.nixpkgs-unstable {
         system = prev.stdenv.hostPlatform.system;
         config.allowUnfree = true;
