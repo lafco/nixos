@@ -47,20 +47,30 @@
 
   # services.graphical-desktop (ligado por services.xserver.enable) ativa o
   # set padrão de fontes (DejaVu, Liberation, unifont e Noto CJK/Emoji).
-  # Desligamos para controlar 100% da lista abaixo (Noto fora).
+  # Desligamos para controlar 100% da lista abaixo.
   fonts.enableDefaultPackages = false;
 
   fonts.packages = with pkgs; [
     ubuntu-sans # fonte padrão do sistema (sans-serif)
     nerd-fonts.symbols-only # ícones do prompt starship
-    jetbrains-mono # fonte pedida pelo wezterm (wezterm.lua: 'Jetbrains Mono')
+    jetbrains-mono # fonte do wezterm (wezterm.lua)
+
+    # Sem estas, CJK (部署指南) cai no bitmap 'Fixed' do font-misc-misc
+    # (12x13ja.pcf.gz, fonte X11 de bitmap que só cobre JIS X 0208 — o resto
+    # vira tofu) e não existe emoji nenhum no sistema. O Firefox/GTK usam o
+    # fontconfig, então basta instalar; o wezterm não usa, e por isso declara
+    # o fallback no wezterm.lua.
+    noto-fonts-cjk-sans
+    noto-fonts-color-emoji
   ];
 
   # Ubuntu Sans como sans-serif padrão do fontconfig: o alias "Sans"
-  # (usado por apps GTK e pelo GNOME por padrão) resolve para ela.
-  # ⚠️ Noto foi removida — sem fonte de emoji colorido agora; se quiser
-  # emojis de volta, adicione p.ex. joypixels ou openmoji aqui.
-  fonts.fontconfig.defaultFonts.sansSerif = [ "Ubuntu Sans" ];
+  # (usado por apps GTK e pelo GNOME por padrão) resolve para ela. O emoji
+  # precisa de alias próprio, senão o fontconfig não acha quem desenha U+1F600.
+  fonts.fontconfig.defaultFonts = {
+    sansSerif = [ "Ubuntu Sans" ];
+    emoji = [ "Noto Color Emoji" ];
+  };
 
   # Aplicativos gráficos padrão (adicione os seus aqui).
   environment.systemPackages = with pkgs; [
