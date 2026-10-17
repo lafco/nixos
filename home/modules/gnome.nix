@@ -324,6 +324,10 @@ in
       gtk-theme = "Yaru-dark";
       color-scheme = "prefer-dark";
       accent-color = "orange";
+
+      # Canto superior esquerdo não abre mais o overview (default é true).
+      enable-hot-corners = false;
+
       font-name = "Ubuntu Sans 10";
       monospace-font-name = "JetBrains Mono 10";
     };
