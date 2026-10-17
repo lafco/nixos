@@ -13,6 +13,7 @@
 #   Super+e           -> gerenciador de arquivos (nautilus)  [custom]
 #   Super+f           -> firefox                      [favorito 3 do dash]
 #   Super+m           -> spotify (área 4)             [favorito 4 do dash]
+#   Super+d           -> discord (Dorion)                     [custom]
 #   Super+k           -> xkill                               [custom]
 #   Super+q           -> fechar janela (soma ao Alt+F4 do GNOME)
 #   Super+t           -> fullscreen
@@ -90,6 +91,16 @@ let
       name = "Volume -";
       command = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 10%-";
       binding = "<Super>minus";
+    }
+    # O Dorion vem das home.packages do home/modules/apps.nix (mesmo caso do
+    # xfce4-appfinder acima). A entrada fica no FIM da lista de propósito:
+    # customId N é o índice nesta lista, então inserir no meio renumeraria os
+    # binds existentes. O comando é `Dorion` com maiúscula — é o nome do
+    # binário no nixpkgs.
+    {
+      name = "Discord (Dorion)";
+      command = "Dorion";
+      binding = "<Super>d";
     }
   ];
 
