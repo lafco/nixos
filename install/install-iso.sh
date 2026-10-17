@@ -42,8 +42,8 @@ sudo -v || die "sudo indisponível (a ISO minimal tem sudo sem senha para o usu�
 # a config do usuário não custa nada e cobre ISOs mais antigas.
 say "Habilitando flakes (nix-command + flakes)"
 mkdir -p ~/.config/nix
-grep -q "experimental-features" ~/.config/nix/nix.conf 2>/dev/null \
-  || echo "experimental-features = nix-command flakes" >>~/.config/nix/nix.conf
+grep -q "experimental-features" ~/.config/nix/nix.conf 2>/dev/null ||
+  echo "experimental-features = nix-command flakes" >>~/.config/nix/nix.conf
 # ⚠️ NÃO escrever /etc/nix/nix.conf: na ISO minimal o /etc é squashfs
 # READ-ONLY (causa do erro "read-only file system" das versões antigas).
 # sudo não herda a config do usuário, então os comandos nix do root
@@ -56,8 +56,8 @@ say "Baixando git e gum (interface da TUI)"
 if ! command -v git >/dev/null 2>&1 || ! command -v gum >/dev/null 2>&1; then
   # `add` é o nome atual; `install` é alias deprecated no Nix >= 2.30
   # (o fallback cobre ISOs antigas, em que `add` ainda não existe).
-  nix profile add nixpkgs#git nixpkgs#gum 2>/dev/null \
-    || nix profile install nixpkgs#git nixpkgs#gum
+  nix profile add nixpkgs#git nixpkgs#gum 2>/dev/null ||
+    nix profile install nixpkgs#git nixpkgs#gum
 fi
 
 # ── 3. obtém o repo ───────────────────────────────────────────────────────
@@ -78,15 +78,15 @@ else
     git -C "$REPO_DIR" pull --ff-only || die "git pull falhou em $REPO_DIR."
   else
     say "Clonando $url"
-    git clone "$url" "$REPO_DIR" \
-      || die "git clone de $url falhou. Se o repo não for acessível dessa URL, defina REPO_URL (ex.: http://IP:8000 para um clone servido na rede local)."
+    git clone "$url" "$REPO_DIR" ||
+      die "git clone de $url falhou. Se o repo não for acessível dessa URL, defina REPO_URL (ex.: http://IP:8000 para um clone servido na rede local)."
   fi
 fi
 cd "$REPO_DIR"
 # Garante que o obtido é ESTE repo — o de dotfiles (lafco/config) não tem
 # flake.nix nem hosts/ e quebraria o passo 5 com "No such file or directory".
-[ -f flake.nix ] && [ -d hosts ] \
-  || die "$REPO_DIR não é o repo de configuração (falta flake.nix/hosts). Remova esse diretório e rode de novo — ou aponte REPO_URL para o repo certo."
+[ -f flake.nix ] && [ -d hosts ] ||
+  die "$REPO_DIR não é o repo de configuração (falta flake.nix/hosts). Remova esse diretório e rode de novo — ou aponte REPO_URL para o repo certo."
 
 # ── 4. TUI ────────────────────────────────────────────────────────────────
 gum style --foreground 212 --bold --border double --padding "1 4" \

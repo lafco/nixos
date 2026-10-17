@@ -4,9 +4,11 @@
   # local.nix é opcional e específico da máquina (gerado pelo instalador da
   # ISO em install/install-iso.sh; não versionado). Sobrescreve hostname,
   # disco (disko) e usuário/senha locais.
-  imports =
-    [ ./hardware-configuration.nix ./disko-config.nix ]
-    ++ lib.optional (builtins.pathExists ./local.nix) ./local.nix;
+  imports = [
+    ./hardware-configuration.nix
+    ./disko-config.nix
+  ]
+  ++ lib.optional (builtins.pathExists ./local.nix) ./local.nix;
 
   networking.hostName = "server";
 
@@ -32,7 +34,10 @@
 
   # Ambiente do usuário no servidor (home-manager em modo módulo) + perfil enxuto.
   home-manager.users.lafco = {
-    imports = [ ../../home/lafco ../../home/profiles/server.nix ];
+    imports = [
+      ../../home/lafco
+      ../../home/profiles/server.nix
+    ];
   };
 
   # Segredos (sops-nix): só ativa quando secrets/secrets.yaml existir.

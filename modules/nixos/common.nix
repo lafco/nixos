@@ -9,7 +9,10 @@
 
   # Necessário para usar este repo (flakes).
   nix.settings = {
-    experimental-features = [ "nix-command" "flakes" ];
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
     auto-optimise-store = true;
   };
 
@@ -26,7 +29,11 @@
   time.timeZone = "America/Sao_Paulo"; # ajuste se necessário
 
   # Ferramentas básicas de sistema (as do usuário vêm via home-manager).
-  environment.systemPackages = with pkgs; [ git curl wget ];
+  environment.systemPackages = with pkgs; [
+    git
+    curl
+    wget
+  ];
 
   # Docker + docker compose, nos dois hosts (daily e server).
   #
