@@ -94,16 +94,20 @@ in
     # O updater interno é desativado pelo overlay: o AppImage fica imutável no
     # /nix/store e novas versões são aplicadas pelo flake/Nix.
     ankama-launcher # jogos Ankama (Dofus, Waven, Wakfu…) — AppImage + wine
-    # Cliente de Discord em Tauri/WebKitGTK (NÃO Electron): carrega o cliente
-    # web do Discord, então a UI é a oficial, e usa o webkitgtk do sistema em
-    # vez de embutir um Chromium. Closure medida: 1,4 GiB (contra ~353 MiB de
-    # um cliente nativo tipo abaddon/ripcord, que reimplementam a UI e por isso
-    # não se parecem com o Discord). Trocas: NÃO tem Vencord — o mod embutido é
-    # o shelter, com menos plugins/temas; e o pacote se chama pkgs.dorion
-    # (minúsculo), enquanto o BINÁRIO e o .desktop são `Dorion` e
-    # `Dorion.desktop` (StartupWMClass=Dorion) — é isso que importa nos ids do
-    # auto-move-windows e no comando dos binds.
-    dorion
+    # Discord oficial (Electron). O override faz duas coisas:
+    #   withOpenASAR -> troca o app.asar do Discord pelo OpenAsar: corta
+    #     telemetria/trackers e acelera o boot, sem mexer na UI oficial;
+    #   withVencord  -> injeta o client mod Vencord (plugins que desligam
+    #     partes da UI: Nitro upsell, presentes, etc.), configurado em
+    #     Configurações -> Vencord.
+    # O pacote é unfree (nixpkgs.config.allowUnfree = true em
+    # modules/nixos/common.nix) e o id do .desktop é `discord.desktop`
+    # (name = pname em makeDesktopItem, StartupWMClass=discord) — é esse id que
+    # vai no favorite-apps/auto-move-windows de home/modules/gnome.nix.
+    (pkgs.discord.override {
+      withOpenASAR = true;
+      withVencord = true;
+    })
   ];
 
   # Início automático no login. O GNOME lê $XDG_CONFIG_HOME/autostart (spec

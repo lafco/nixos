@@ -13,8 +13,9 @@
 #   Super+e           -> gerenciador de arquivos (nautilus)  [custom]
 #   Super+f           -> firefox                      [favorito 3 do dash]
 #   Super+m           -> spotify (área 4)             [favorito 4 do dash]
-#   Super+d           -> discord (Dorion)                     [custom]
-#   Super+k           -> xkill                               [custom]
+#   Super+d           -> discord (área 4)             [favorito 5 do dash]
+#   Super+k           -> kangen (área 4)              [favorito 6 do dash]
+#   Super+Shift+k     -> xkill                               [custom]
 #   Super+q           -> fechar janela (soma ao Alt+F4 do GNOME)
 #   Super+t           -> fullscreen
 #   Super+Up/Down     -> maximizar/restaurar (já é default do GNOME)
@@ -34,7 +35,7 @@
 #
 # Além dos keybinds, este módulo fixa 4 áreas de trabalho estáticas e usa a
 # extensão auto-move-windows para pinar apps na sua área (wezterm -> 1,
-# firefox -> 2, steam/ankama/jogos -> 3, spotify -> 4). Exige
+# firefox -> 2, steam/ankama/jogos -> 3, spotify/discord/kangen -> 4). Exige
 # dynamic-workspaces = false: com áreas dinâmicas os números mudam quando uma
 # área fica vazia.
 #
@@ -43,11 +44,19 @@
 # XDG, que inclui o sufixo); sem ele o lookup devolve NULL e a regra é
 # descartada em silêncio — era o que acontecia antes.
 #
-# O "focar se aberto, senão abrir" do terminal/firefox não é um comando: é o
-# switch-to-application-N do próprio Shell, que chama app.activate() — foca a
-# janela mais recente do app (trocando para a área dela) ou lança uma nova.
-# Como o N indexa os FAVORITOS do dash, favorite-apps é declarado aqui, e a
-# ordem do dash passa a vir da config (reordenar pelo GUI é revertido).
+# O "focar se aberto, senão abrir" do terminal/firefox/spotify/discord/kangen
+# não é um comando: é o switch-to-application-N do próprio Shell, que chama
+# app.activate() — foca a janela mais recente do app (trocando para a área dela)
+# ou lança uma nova. Como o N indexa os FAVORITOS do dash, favorite-apps é
+# declarado aqui, e a ordem do dash passa a vir da config (reordenar pelo GUI é
+# revertido).
+#
+# É por isso que o discord e o kangen NÃO são custom bindings: um comando solto
+# lança uma instância a cada aperto e deixa a janela na área atual. Com
+# switch-to-application o Shell deduplica (uma instância) e a área vem do
+# auto-move-windows abaixo. O preço é o ícone fixo na dock: o N do
+# switch-to-application é a posição em favorite-apps, então não há como usar o
+# mecanismo sem estar no dash.
 #
 # Ctrl+Return NÃO é bound de propósito: tecla de binding do Shell é capturada
 # globalmente, então o app focado (wezterm, Firefox) nunca a receberia.
@@ -66,6 +75,9 @@
 let
   # Keybinds de comando. Os binários vêm dos systemPackages do host daily
   # (modules/nixos/desktop.nix) — o GNOME herda o PATH da sessão gráfica.
+  #
+  # customId N é o ÍNDICE nesta lista: para acrescentar sem renumerar os binds
+  # existentes, adicione no FIM.
   customs = [
     {
       name = "Gerenciador de arquivos";
@@ -80,7 +92,7 @@ let
     {
       name = "Xkill";
       command = "xkill";
-      binding = "<Super>k";
+      binding = "<Super><Shift>k";
     }
     {
       name = "Volume +";
@@ -91,16 +103,6 @@ let
       name = "Volume -";
       command = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 10%-";
       binding = "<Super>minus";
-    }
-    # O Dorion vem das home.packages do home/modules/apps.nix (mesmo caso do
-    # xfce4-appfinder acima). A entrada fica no FIM da lista de propósito:
-    # customId N é o índice nesta lista, então inserir no meio renumeraria os
-    # binds existentes. O comando é `Dorion` com maiúscula — é o nome do
-    # binário no nixpkgs.
-    {
-      name = "Discord (Dorion)";
-      command = "Dorion";
-      binding = "<Super>d";
     }
   ];
 
@@ -246,12 +248,15 @@ in
       # Super+1..4 fica para as áreas de trabalho — mas o
       # switch-to-application-N segue sendo o "focar se aberto, senão abrir" do
       # Shell, só com outras teclas: 1 = favorito 1 (wezterm), 3 = favorito 3
-      # (firefox), 4 = favorito 4 (spotify); ver favorite-apps abaixo. O 2 fica
+      # (firefox), 4 = favorito 4 (spotify), 5 = favorito 5 (discord, área 4),
+      # 6 = favorito 6 (kangen, área 4); ver favorite-apps abaixo. O 2 fica
       # vazio.
       switch-to-application-1 = [ "<Super>Return" ];
       switch-to-application-2 = noKeys;
       switch-to-application-3 = [ "<Super>f" ];
       switch-to-application-4 = [ "<Super>m" ];
+      switch-to-application-5 = [ "<Super>d" ];
+      switch-to-application-6 = [ "<Super>k" ];
 
       # Libera Super+a: acima ele volta a ser o appfinder.
       toggle-application-view = noKeys;
@@ -276,13 +281,23 @@ in
       ];
 
       # Ordem do dash — é ela que dá o índice do switch-to-application-N (1 =
-      # wezterm, 3 = firefox, 4 = spotify), por isso a lista é declarativa. O
-      # obsidian fica no meio porque já estava no dash.
+      # wezterm, 3 = firefox, 4 = spotify, 5 = discord, 6 = kangen), por isso a
+      # lista é declarativa. O obsidian fica no meio porque já estava no dash. O
+      # discord é `discord.desktop` (pkgs.discord; ver home/modules/apps.nix). O
+      # kangen é `dev.lafco.kangen.desktop`, instalado pelo próprio projeto
+      # (~/.local/share/applications/dev.lafco.kangen.desktop, fora deste repo).
+      # ⚠️ O kangen é Tauri e precisa de `app.enableGTKAppId = true` no
+      # tauri.conf.json (identifier dev.lafco.kangen): sem isso o Shell não
+      # associa a janela ao ShellApp, o switch-to-application acha que o app
+      # está parado e cada Super+K lança uma nova instância.
+      # Os dois entram no FIM para não renumerar os binds acima.
       favorite-apps = [
         "org.wezfurlong.wezterm.desktop"
         "obsidian.desktop"
         "firefox.desktop"
         "spotify.desktop"
+        "discord.desktop"
+        "dev.lafco.kangen.desktop"
       ];
     };
 
@@ -313,6 +328,8 @@ in
         "steam.desktop:3"
         "ankama-launcher.desktop:3"
         "spotify.desktop:4"
+        "discord.desktop:4"
+        "dev.lafco.kangen.desktop:4"
       ]
       ++ gameAutoMove;
     };
