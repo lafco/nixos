@@ -3,9 +3,9 @@
 # nodejs_22 e python3 também são usados pelos plugins do nvim (editor.nix);
 # repetir aqui é inofensivo e deixa a intenção explícita.
 #
-# Rust: toolchain estável do nixpkgs (cargo/rustc/rustfmt/clippy). Se um dia
-# precisar de múltiplas toolchains/rustup, troque por:
-#   rustup  # + variáveis RUSTUP_HOME/CARGO_HOME e PATH ~/.cargo/bin
+# Rust: o rustup gerencia o toolchain e os targets (ex.: Android). Os binários
+# (cargo/rustc/rustfmt/clippy) ficam em ~/.cargo/bin, já no PATH do .bashrc;
+# rode `rustup default stable` uma vez após a ativação.
 #
 # Tauri v2: a seção no fim do arquivo traz a stack nativa (WebKitGTK 4.1) e as
 # variáveis de ambiente sem as quais o `cargo build` não acha as libs.
@@ -46,10 +46,7 @@ in
     with pkgs;
     [
       # rust
-      cargo
-      rustc
-      rustfmt
-      clippy
+      rustup
 
       # javascript/typescript
       nodejs_22

@@ -7,6 +7,9 @@
   # obsidian/ankama-launcher (apps do home/modules) são unfree.
   nixpkgs.config.allowUnfree = true;
 
+  # Android SDK (androidenv) exige aceitar a licença da Google.
+  nixpkgs.config.android_sdk.accept_license = true;
+
   # Necessário para usar este repo (flakes).
   nix.settings = {
     experimental-features = [

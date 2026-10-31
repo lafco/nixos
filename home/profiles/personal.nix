@@ -8,6 +8,7 @@
     ../modules/apps.nix
     ../modules/spicetify.nix
     ../modules/gnome.nix
+    ../modules/android.nix
   ];
 
   home.packages = with pkgs; [

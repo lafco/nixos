@@ -10,6 +10,12 @@
   ]
   ++ lib.optional (builtins.pathExists ./local.nix) ./local.nix;
 
+  # Android build (Tauri v2): o AGP baixa binários Linux "genéricos" (aapt2
+  # etc.) do Maven que pedem /lib64/ld-linux-x86-64.so.2. O nix-ld substitui o
+  # stub do NixOS por um loader real + as bibliotecas comuns (o default já
+  # inclui stdenv.cc.cc -> libgcc_s, que o aapt2 precisa; a glibc é automática).
+  programs.nix-ld.enable = true;
+
   networking.hostName = "daily";
 
   # UEFI + Limine (disko cria a partição ESP).
