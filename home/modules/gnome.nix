@@ -14,7 +14,7 @@
 #   Super+f           -> firefox                      [favorito 3 do dash]
 #   Super+m           -> spotify (área 4)             [favorito 4 do dash]
 #   Super+d           -> discord (área 4)             [favorito 5 do dash]
-#   Super+k           -> kangen (área 4)              [favorito 6 do dash]
+#   Super+k           -> kangen (área 4)              [custom: troca de área + foca/abre]
 #   Super+Shift+k     -> xkill                               [custom]
 #   Super+q           -> fechar janela (soma ao Alt+F4 do GNOME)
 #   Super+t           -> fullscreen
@@ -44,19 +44,33 @@
 # XDG, que inclui o sufixo); sem ele o lookup devolve NULL e a regra é
 # descartada em silêncio — era o que acontecia antes.
 #
-# O "focar se aberto, senão abrir" do terminal/firefox/spotify/discord/kangen
-# não é um comando: é o switch-to-application-N do próprio Shell, que chama
+# O "focar se aberto, senão abrir" do terminal/firefox/spotify/discord não é um
+# comando: é o switch-to-application-N do próprio Shell, que chama
 # app.activate() — foca a janela mais recente do app (trocando para a área dela)
 # ou lança uma nova. Como o N indexa os FAVORITOS do dash, favorite-apps é
 # declarado aqui, e a ordem do dash passa a vir da config (reordenar pelo GUI é
 # revertido).
 #
-# É por isso que o discord e o kangen NÃO são custom bindings: um comando solto
-# lança uma instância a cada aperto e deixa a janela na área atual. Com
-# switch-to-application o Shell deduplica (uma instância) e a área vem do
-# auto-move-windows abaixo. O preço é o ícone fixo na dock: o N do
-# switch-to-application é a posição em favorite-apps, então não há como usar o
-# mecanismo sem estar no dash.
+# É por isso que o discord NÃO é custom binding: um comando solto lança uma
+# instância a cada aperto e deixa a janela na área atual. Com switch-to-application
+# o Shell deduplica (uma instância) e a área vem do auto-move-windows abaixo. O
+# preço é o ícone fixo na dock: o N do switch-to-application é a posição em
+# favorite-apps, então não há como usar o mecanismo sem estar no dash.
+#
+# O kangen saiu do switch-to-application por causa da demora: o app.activate()
+# espera a janela nascer (o binário é build DEBUG do Tauri/WebKitGTK, demora
+# segundos) e só então troca a área — por isso o Super+k parecia "demorado".
+# Virou custom: o script `kangen-open` (writeShellApplication) chama a extensão
+# `kangen-focus` (instalada por este módulo, ver kangenExtensionFiles no `let`),
+# que troca para a área 4 NA HORA e então foca a janela existente ou lança uma
+# nova — a dedup ("focar se aberto, senão abrir") fica por conta do app.activate()
+# do próprio Shell. Ver o custom "Kangen" em `customs` e o kangenOpen no `let`.
+#
+# ⚠️ O GNOME Wayland não expõe API para focar janela de fora (o wmctrl -a só
+# enxerga janelas X11, e o FocusApp do org.gnome.Shell só mexe no overview),
+# por isso a extensão: ela expõe dev.lafco.KangenFocus.ActivateOn no D-Bus da
+# sessão, com a mesma semântica do switch-to-application. Sem ela, cada aperto
+# abriria uma instância nova ou nem focaria a que existe.
 #
 # Ctrl+Return NÃO é bound de propósito: tecla de binding do Shell é capturada
 # globalmente, então o app focado (wezterm, Firefox) nunca a receberia.
@@ -104,6 +118,11 @@ let
       command = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 10%-";
       binding = "<Super>minus";
     }
+    {
+      name = "Kangen";
+      command = "kangen-open";
+      binding = "<Super>k";
+    }
   ];
 
   customId = i: "custom${toString i}";
@@ -124,6 +143,134 @@ let
 
   # Array vazio tipado: `[]` cru perde o tipo e o dconf recusa.
   noKeys = lib.gvariant.mkEmptyArray lib.gvariant.type.string;
+
+  # Extensão de GNOME Shell do Super+k: expõe dev.lafco.KangenFocus no D-Bus
+  # da sessão com o método ActivateOn(appId, área 0-based). O GNOME Wayland não
+  # tem API pública para focar janela de fora do Shell (wmctrl só vê janelas
+  # X11; org.gnome.Shell.FocusApp só mexe no overview), então a extensão faz o
+  # que o switch-to-application faria:
+  #   1) troca para a área na hora (feedback imediato, sem esperar o launch do
+  #      binário DEBUG do Tauri);
+  #   2) app.activate(): foca a janela mais recente (trocando de área se
+  #      preciso) ou lança uma nova — a dedup é do Shell, não de pgrep.
+  #
+  # Instalada em ~/.local/share/gnome-shell/extensions via xdg.dataFile (ver
+  # kangenExtensionFiles abaixo) e habilitada em enabled-extensions. Requer o
+  # app.enableGTKAppId do kangen (aviso no bloco favorite-apps): sem a
+  # associação janela↔app, o get_windows() volta vazio e cada aperto lança
+  # uma instância nova.
+  kangenExtensionUuid = "kangen-focus@lafco.dev";
+
+  kangenExtensionFiles = {
+    "gnome-shell/extensions/${kangenExtensionUuid}/metadata.json".text = builtins.toJSON {
+      uuid = kangenExtensionUuid;
+      name = "Kangen Focus";
+      description = "D-Bus para focar/abrir apps (usado pelo Super+k → kangen-open)";
+      "shell-version" = [ "50" ];
+      version = 1;
+    };
+    "gnome-shell/extensions/${kangenExtensionUuid}/extension.js".text = ''
+      import Gio from 'gi://Gio';
+      import Shell from 'gi://Shell';
+      import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
+
+      const ifaceXml = `
+      <node>
+        <interface name="dev.lafco.KangenFocus">
+          <method name="ActivateOn">
+            <arg type="s" direction="in" name="appId"/>
+            <arg type="u" direction="in" name="workspace"/>
+            <arg type="s" direction="out" name="status"/>
+          </method>
+        </interface>
+      </node>`;
+
+      export default class KangenFocusExtension extends Extension {
+        enable() {
+          this._dbusImpl = Gio.DBusExportedObject.wrapJSObject(
+            Gio.DBusInterfaceInfo.new_for_xml(ifaceXml),
+            this,
+          );
+          this._dbusImpl.export(Gio.DBus.session, '/dev/lafco/KangenFocus');
+          this._nameId = Gio.DBus.session.own_name(
+            'dev.lafco.KangenFocus',
+            Gio.BusNameOwnerFlags.NONE,
+            null,
+            null,
+          );
+        }
+
+        disable() {
+          if (this._nameId) {
+            Gio.DBus.session.unown_name(this._nameId);
+            this._nameId = 0;
+          }
+          if (this._dbusImpl) {
+            this._dbusImpl.unexport();
+            this._dbusImpl = null;
+          }
+        }
+
+        ActivateOn(appId, workspace) {
+          const app = Shell.AppSystem.get_default().lookup_app(appId);
+          if (!app)
+            return 'not-found';
+
+          // Troca para a área ANTES de ativar: no primeiro launch o kangen
+          // demora segundos e o feedback precisa ser imediato.
+          const ws = global.workspace_manager.get_workspace_by_index(workspace);
+          if (ws)
+            ws.activate(global.get_current_time());
+
+          app.activate(); // foca a janela mais recente ou lança uma nova
+          return 'ok';
+        }
+      }
+    '';
+  };
+
+  # Script do Super+k (custom "Kangen").
+  #
+  # ⚠️ Precisa ser um script (e não one-liner): o gsd-media-keys executa o
+  # `command` do custom binding SEM shell (split de argv via
+  # g_shell_parse_argv), então `;`/`||`/`>` não funcionam direto no command.
+  #
+  # 1) Caminho normal: a extensão kangen-focus troca para a 4ª área NA HORA
+  #    (sem esperar o launch do kangen) e foca a janela existente — ou lança
+  #    uma nova se ainda não houver (dedup do Shell, mesma semântica do
+  #    switch-to-application).
+  # 2) Fallback se a extensão não estiver carregada (ex.: primeiro boot depois
+  #    do deploy): troca de área via EWMH e abre só se não houver processo do
+  #    kangen (dedup por pgrep); o launcher kangen-desktop.sh sobe o servidor
+  #    e exec o binário.
+  kangenOpen = pkgs.writeShellApplication {
+    name = "kangen-open";
+    runtimeInputs = [
+      pkgs.glib.bin # gdbus (chama a extensão kangen-focus)
+      pkgs.wmctrl # troca de área via EWMH (fallback)
+      pkgs.procps # pgrep (dedup do fallback)
+      pkgs.gtk3 # gtk-launch (abre o .desktop do kangen no fallback)
+    ];
+    text = ''
+      APP_ID=dev.lafco.kangen.desktop
+      WORKSPACE=3 # 4ª área (índice 0-based)
+
+      # 1) Extensão: troca para a área na hora e foca/abre o kangen.
+      if gdbus call --session \
+           --dest dev.lafco.KangenFocus \
+           --object-path /dev/lafco/KangenFocus \
+           --method dev.lafco.KangenFocus.ActivateOn "$APP_ID" "$WORKSPACE" \
+           >/dev/null 2>&1; then
+        exit 0
+      fi
+
+      # 2) Fallback sem a extensão: EWMH + só abre se não houver processo.
+      wmctrl -s "$WORKSPACE" || true
+      if ! pgrep -f 'kangen-desktop$' >/dev/null 2>&1; then
+        gtk-launch "$APP_ID" || true
+      fi
+    '';
+  };
 
   # Jogos da Steam fixados numa área de trabalho.
   #
@@ -190,16 +337,24 @@ in
 {
   # O appfinder do Super+a vinha do desktopManager.xfce (removido do repo) —
   # agora é instalado direto. O Papirus é o icon-theme do GNOME (abaixo).
+  # O kangenOpen é o script do Super+k (troca de área + foca/abre o kangen via
+  # a extensão kangen-focus); entra no profile para ficar no PATH da sessão do
+  # GNOME Shell.
   home.packages = [
     pkgs.xfce4-appfinder
     pkgs.papirus-icon-theme
+    kangenOpen
   ];
 
-  # .desktop dos jogos da Steam (ver o comentário em steamGames acima) e do
-  # wezterm com herdr (ver weztermDesktop).
-  xdg.dataFile = gameDesktopEntries // {
-    ${weztermDesktopName}.text = weztermDesktop;
-  };
+  # .desktop dos jogos da Steam (ver o comentário em steamGames acima), do
+  # wezterm com herdr (ver weztermDesktop) e da extensão kangen-focus (ver
+  # kangenExtensionFiles no let).
+  xdg.dataFile =
+    gameDesktopEntries
+    // {
+      ${weztermDesktopName}.text = weztermDesktop;
+    }
+    // kangenExtensionFiles;
 
   dconf.settings = customSettings // {
     "org/gnome/settings-daemon/plugins/media-keys" = {
@@ -212,6 +367,10 @@ in
         "<Alt>F4"
       ];
       toggle-fullscreen = [ "<Super>t" ];
+
+      # Alt+Space abre o menu da janela por padrão e atrapalha nos jogos
+      # (apertado sem querer). Desligado.
+      activate-window-menu = noKeys;
 
       # O default do GNOME só tem Super+Home na área 1.
       switch-to-workspace-1 = [ "<Super>1" ];
@@ -248,15 +407,15 @@ in
       # Super+1..4 fica para as áreas de trabalho — mas o
       # switch-to-application-N segue sendo o "focar se aberto, senão abrir" do
       # Shell, só com outras teclas: 1 = favorito 1 (wezterm), 3 = favorito 3
-      # (firefox), 4 = favorito 4 (spotify), 5 = favorito 5 (discord, área 4),
-      # 6 = favorito 6 (kangen, área 4); ver favorite-apps abaixo. O 2 fica
-      # vazio.
+      # (firefox), 4 = favorito 4 (spotify), 5 = favorito 5 (discord, área 4);
+      # ver favorite-apps abaixo. O 2 fica vazio. O 6 (kangen) virou custom para
+      # trocar a área antes de abrir (ver `customs`).
       switch-to-application-1 = [ "<Super>Return" ];
       switch-to-application-2 = noKeys;
       switch-to-application-3 = [ "<Super>f" ];
       switch-to-application-4 = [ "<Super>m" ];
       switch-to-application-5 = [ "<Super>d" ];
-      switch-to-application-6 = [ "<Super>k" ];
+      switch-to-application-6 = noKeys;
 
       # Libera Super+a: acima ele volta a ser o appfinder.
       toggle-application-view = noKeys;
@@ -278,11 +437,15 @@ in
         "appindicatorsupport@rgcjonas.gmail.com"
         "auto-move-windows@gnome-shell-extensions.gcampax.github.com"
         "dash-to-dock@micxgx.gmail.com"
+        # Foca/abre apps pelo D-Bus da sessão — o Super+k usa para o kangen
+        # (ver kangenOpen no let).
+        "kangen-focus@lafco.dev"
       ];
 
       # Ordem do dash — é ela que dá o índice do switch-to-application-N (1 =
-      # wezterm, 3 = firefox, 4 = spotify, 5 = discord, 6 = kangen), por isso a
-      # lista é declarativa. O obsidian fica no meio porque já estava no dash. O
+      # wezterm, 3 = firefox, 4 = spotify, 5 = discord; o 6 = kangen fica só na
+      # dock, porque o bind dele virou custom), por isso a lista é declarativa.
+      # O obsidian fica no meio porque já estava no dash. O
       # discord é `discord.desktop` (pkgs.discord; ver home/modules/apps.nix). O
       # kangen é `dev.lafco.kangen.desktop`, instalado pelo próprio projeto
       # (~/.local/share/applications/dev.lafco.kangen.desktop, fora deste repo).
