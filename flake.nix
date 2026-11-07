@@ -56,6 +56,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Flatpak declarativo (remotes + pacotes instalados na ativação, via
+    # serviço systemd). O módulo do nixpkgs só habilita o flatpak; este cuida
+    # do ciclo de vida dos apps. Pinado na release estável.
+    # Atualização: `nix flake update nix-flatpak`.
+    nix-flatpak.url = "github:gmodena/nix-flatpak?ref=v0.8.0";
+
     # ══ Lix (alternativa ao Nix oficial) ═══════════════════════════════
     # Se preferir o Lix (fork comunitário), descomente e adicione o módulo
     # abaixo à lista `modules` de cada host. É drop-in: o resto não muda.
@@ -75,6 +81,7 @@
       sops-nix,
       disko,
       treefmt-nix,
+      nix-flatpak,
       ...
     }:
     let
@@ -106,6 +113,8 @@
           ./modules/nixos/torrents.nix
           ./modules/nixos/database.nix
           ./modules/nixos/remote.nix
+          ./modules/nixos/flatpak.nix
+          nix-flatpak.nixosModules.nix-flatpak
           disko.nixosModules.disko
           sops-nix.nixosModules.sops
           home-manager.nixosModules.home-manager
