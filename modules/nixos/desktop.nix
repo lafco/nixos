@@ -104,15 +104,37 @@
     epiphany
   ];
 
+  # 1Password: GUI + CLI (`op`) vêm dos módulos do nixpkgs, que instalam os
+  # wrappers setgid (`1Password-BrowserSupport` em /run/wrappers/bin e `op`) e
+  # a integração polkit. `polkitPolicyOwners` é o que libera o desbloqueio por
+  # senha/fingerprint do sistema na GUI; sem ele o polkit nega.
+  #
+  # A ponte extensão do Firefox ↔ app é o native messaging host: o JSON que
+  # autoriza o 1Password-BrowserSupport (a wrapper setgid instalada acima pelo
+  # módulo) a atender a extensão. Ele é declarado em home/modules/apps.nix
+  # (~/.mozilla/native-messaging-hosts/com.1password.1password.json); o próprio
+  # app também grava esse arquivo quando roda, e os dois conteúdos batem.
+  programs._1password.enable = true;
+  programs._1password-gui = {
+    enable = true;
+    polkitPolicyOwners = [ "lafco" ];
+  };
+
   # Browser padrão. Sem um mimeapps.list, o glib (gio, que é o que os apps
   # chamam para abrir link) resolve text/html e x-scheme-handler/* para o
   # Epiphany — era por isso que clicar num link abria o GNOME Web, mesmo com o
   # firefox instalado. Aqui o default fica explícito; o arquivo gerado é
   # /etc/xdg/mimeapps.list.
+  #
+  # mailto vai para o app da Fastmail (pacote em home/modules/apps.nix); o Exec
+  # do .desktop é `fastmail %U`, então o `mailto:` chega inteiro. Não há
+  # `webcal:` aqui porque o .desktop do app só declara
+  # `x-scheme-handler/mailto` e `x-scheme-handler/fastmail`.
   xdg.mime.defaultApplications = {
     "text/html" = "firefox.desktop";
     "application/xhtml+xml" = "firefox.desktop";
     "x-scheme-handler/http" = "firefox.desktop";
     "x-scheme-handler/https" = "firefox.desktop";
+    "x-scheme-handler/mailto" = "fastmail.desktop";
   };
 }

@@ -88,10 +88,17 @@
           hash = "sha256-vQLZtWAitEgADCsL43cafWYkZy+uvDO3FGyxd3XmXog=";
         };
       });
+
+      # Fastmail desktop: o nixpkgs (estável 26.05 e o unstable pinado) fixa
+      # 1.4.0, cujo AppImage a Fastmail já apagou do CDN (404 → build quebra).
+      # O pacote local é uma cópia da receita do nixpkgs master (1.9.0). Ver
+      # pkgs/fastmail-desktop.nix (instruções de bump lá).
+      fastmailDesktop = final.callPackage ../pkgs/fastmail-desktop.nix { };
     in
     {
       ankama-launcher = ankamaLauncher;
       proton-pass = protonPass;
+      fastmail-desktop = fastmailDesktop;
 
       # OpenCode v2 (binário pré-compilado do npm oficial) — o nixpkgs só tem a
       # série 1.x. Consumido por home/modules/ai.nix. Ver pkgs/opencode-v2.nix.
