@@ -94,11 +94,16 @@
       # O pacote local é uma cópia da receita do nixpkgs master (1.9.0). Ver
       # pkgs/fastmail-desktop.nix (instruções de bump lá).
       fastmailDesktop = final.callPackage ../pkgs/fastmail-desktop.nix { };
+
+      # OpenChamber desktop: AppImage do release oficial. Ver
+      # pkgs/openchamber.nix (limitações em NixOS + instruções de bump lá).
+      openchamber = final.callPackage ../pkgs/openchamber.nix { };
     in
     {
       ankama-launcher = ankamaLauncher;
       proton-pass = protonPass;
       fastmail-desktop = fastmailDesktop;
+      inherit openchamber;
 
       # OpenCode v2 (binário pré-compilado do npm oficial) — o nixpkgs só tem a
       # série 1.x. Consumido por home/modules/ai.nix. Ver pkgs/opencode-v2.nix.

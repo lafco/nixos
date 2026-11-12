@@ -133,6 +133,10 @@ in
     # nixpkgs.config.allowUnfree em modules/nixos/common.nix.
     kiro # config em ~/.config/Kiro/User -> ~/dotfiles/kiro
     obsidian # notas — template de tema disponível no Noctalia
+    # OpenChamber: IDE agêntica em cima do OpenCode (Electron, AppImage do
+    # release oficial) — ver pkgs/openchamber.nix. Em teste: o app embute o
+    # próprio OpenCode CLI, então não usa o pkgs/opencode-v2 daqui.
+    openchamber
     # O updater interno é desativado pelo overlay: o AppImage fica imutável no
     # /nix/store e novas versões são aplicadas pelo flake/Nix.
     ankama-launcher # jogos Ankama (Dofus, Waven, Wakfu…) — AppImage + wine
