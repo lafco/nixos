@@ -1,10 +1,10 @@
-# Apps de desktop: Firefox (declarativo) + 1Password + Fastmail + IDEs (Zed, Kiro)
+# Apps de desktop: Firefox (declarativo) + 1Password + Fastmail + IDEs (Zed, OpenChamber)
 # Firefox: extensões e preferências versionadas; login/sync continua manual (1x).
 # 1Password: GUI e CLI vêm dos módulos do NixOS (programs._1password e
 # _1password-gui, em modules/nixos/desktop.nix) — aqui só a extensão do
 # Firefox, que é a parte que o home-manager instala declarativamente.
 #
-# Zed e Kiro são só os PACOTES: settings/keymap/keybindings vêm do repo de
+# O Zed é só o PACOTE: settings/keymap vêm do repo de
 # dotfiles via symlink (home/modules/dotfiles.nix), não do módulo
 # `programs.zed-editor` do home-manager — ele escreveria o settings.json e
 # brigaria com o symlink.
@@ -129,10 +129,6 @@ in
     # NÃO usar pkgs.zed: esse é o CLI do data lake da Brim Data
     # (zed.brimdata.io), não o editor do zed.dev — e é por isso que o binário
     # do editor se chama `zeditor` no nixpkgs.
-    # IDE da AWS (fork do VS Code). Licença amazonsl (unfree), liberada por
-    # nixpkgs.config.allowUnfree em modules/nixos/common.nix.
-    kiro # config em ~/.config/Kiro/User -> ~/dotfiles/kiro
-    obsidian # notas — template de tema disponível no Noctalia
     # OpenChamber: IDE agêntica em cima do OpenCode (Electron, AppImage do
     # release oficial) — ver pkgs/openchamber.nix. Em teste: o app embute o
     # próprio OpenCode CLI, então não usa o pkgs/opencode-v2 daqui.
@@ -140,18 +136,23 @@ in
     # O updater interno é desativado pelo overlay: o AppImage fica imutável no
     # /nix/store e novas versões são aplicadas pelo flake/Nix.
     ankama-launcher # jogos Ankama (Dofus, Waven, Wakfu…) — AppImage + wine
-    # Discord oficial (Electron). O override faz duas coisas:
-    #   withOpenASAR -> troca o app.asar do Discord pelo OpenAsar: corta
-    #     telemetria/trackers e acelera o boot, sem mexer na UI oficial;
-    #   withVencord  -> injeta o client mod Vencord (plugins que desligam
-    #     partes da UI: Nitro upsell, presentes, etc.), configurado em
-    #     Configurações -> Vencord.
+    # Discord oficial (Electron) com o client mod Vencord (plugins que desligam
+    # partes da UI: Nitro upsell, presentes, etc.), configurado em
+    # Configurações -> Vencord.
+    #
+    # SEM OpenAsar: a versão pinada no nixpkgs (0-unstable-2026-07-24, que é o
+    # HEAD do upstream) quebra com o Electron 43 do Discord 1.0.138 — o
+    # `ipcRenderer.send('cs', c)` do src/config/preload.js manda um objeto não
+    # clonável pro processo principal, o setup aborta com "An object could not
+    # be cloned" e a janela fica preta (só o BACKGROUND_COLOR do settings). Não
+    # é GPU nem Wayland: preto em XWayland, em Wayland nativo e com
+    # --disable-gpu; sem OpenAsar a UI desenha em qualquer um dos três.
+    # Reative `withOpenASAR = true` quando o upstream corrigir.
     # O pacote é unfree (nixpkgs.config.allowUnfree = true em
     # modules/nixos/common.nix) e o id do .desktop é `discord.desktop`
     # (name = pname em makeDesktopItem, StartupWMClass=discord) — é esse id que
     # vai no favorite-apps/auto-move-windows de home/modules/gnome.nix.
     (pkgs.discord.override {
-      withOpenASAR = true;
       withVencord = true;
     })
   ];

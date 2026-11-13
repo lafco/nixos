@@ -11,9 +11,9 @@
 # Keybinds:
 #   Super+Return      -> terminal (wezterm + herdr)   [favorito 1 do dash]
 #   Super+e           -> gerenciador de arquivos (nautilus)  [custom]
-#   Super+f           -> firefox                      [favorito 3 do dash]
-#   Super+m           -> spotify (área 4)             [favorito 4 do dash]
-#   Super+d           -> discord (área 4)             [favorito 5 do dash]
+#   Super+f           -> firefox                      [favorito 2 do dash]
+#   Super+m           -> spotify (área 4)             [favorito 3 do dash]
+#   Super+d           -> discord (área 4)             [favorito 4 do dash]
 #   Super+k           -> kangen (área 4)              [custom: troca de área + foca/abre]
 #   Super+Shift+k     -> xkill                               [custom]
 #   Super+q           -> fechar janela (soma ao Alt+F4 do GNOME)
@@ -406,16 +406,15 @@ in
     "org/gnome/shell/keybindings" = {
       # Super+1..4 fica para as áreas de trabalho — mas o
       # switch-to-application-N segue sendo o "focar se aberto, senão abrir" do
-      # Shell, só com outras teclas: 1 = favorito 1 (wezterm), 3 = favorito 3
-      # (firefox), 4 = favorito 4 (spotify), 5 = favorito 5 (discord, área 4);
-      # ver favorite-apps abaixo. O 2 fica vazio. O 6 (kangen) virou custom para
-      # trocar a área antes de abrir (ver `customs`).
+      # Shell, só com outras teclas: 1 = favorito 1 (wezterm), 2 = favorito 2
+      # (firefox), 3 = favorito 3 (spotify), 4 = favorito 4 (discord, área 4);
+      # ver favorite-apps abaixo. O 5 (kangen) virou custom para trocar a área
+      # antes de abrir (ver `customs`), então fica vazio.
       switch-to-application-1 = [ "<Super>Return" ];
-      switch-to-application-2 = noKeys;
-      switch-to-application-3 = [ "<Super>f" ];
-      switch-to-application-4 = [ "<Super>m" ];
-      switch-to-application-5 = [ "<Super>d" ];
-      switch-to-application-6 = noKeys;
+      switch-to-application-2 = [ "<Super>f" ];
+      switch-to-application-3 = [ "<Super>m" ];
+      switch-to-application-4 = [ "<Super>d" ];
+      switch-to-application-5 = noKeys;
 
       # Libera Super+a: acima ele volta a ser o appfinder.
       toggle-application-view = noKeys;
@@ -443,11 +442,10 @@ in
       ];
 
       # Ordem do dash — é ela que dá o índice do switch-to-application-N (1 =
-      # wezterm, 3 = firefox, 4 = spotify, 5 = discord; o 6 = kangen fica só na
+      # wezterm, 2 = firefox, 3 = spotify, 4 = discord; o 5 = kangen fica só na
       # dock, porque o bind dele virou custom), por isso a lista é declarativa.
-      # O obsidian fica no meio porque já estava no dash. O
-      # discord é `discord.desktop` (pkgs.discord; ver home/modules/apps.nix). O
-      # kangen é `dev.lafco.kangen.desktop`, instalado pelo próprio projeto
+      # O discord é `discord.desktop` (pkgs.discord; ver home/modules/apps.nix).
+      # O kangen é `dev.lafco.kangen.desktop`, instalado pelo próprio projeto
       # (~/.local/share/applications/dev.lafco.kangen.desktop, fora deste repo).
       # ⚠️ O kangen é Tauri e precisa de `app.enableGTKAppId = true` no
       # tauri.conf.json (identifier dev.lafco.kangen): sem isso o Shell não
@@ -456,7 +454,6 @@ in
       # Os dois entram no FIM para não renumerar os binds acima.
       favorite-apps = [
         "org.wezfurlong.wezterm.desktop"
-        "obsidian.desktop"
         "firefox.desktop"
         "spotify.desktop"
         "discord.desktop"
