@@ -20,6 +20,7 @@ in
 
     # terminal
     ".config/wezterm".source = link "wezterm/.config/wezterm";
+    ".config/ghostty".source = link "ghostty/.config/ghostty";
     ".config/zellij".source = link "zellij/.config/zellij";
 
     # shell tools
@@ -37,7 +38,5 @@ in
     # IDEs
     ".config/zed/settings.json".source = link "zed/.config/zed/settings.json";
     ".config/zed/keymap.json".source = link "zed/.config/zed/keymap.json";
-    ".config/Kiro/User/settings.json".source = link "kiro/.config/Kiro/User/settings.json";
-    ".config/Kiro/User/keybindings.json".source = link "kiro/.config/Kiro/User/keybindings.json";
   };
 }
