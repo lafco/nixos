@@ -62,6 +62,11 @@
     # Atualização: `nix flake update nix-flatpak`.
     nix-flatpak.url = "github:gmodena/nix-flatpak?ref=v0.8.0";
 
+    # Agente ericai (ZeroClaw + OpenCode): repo local, importa o módulo
+    # services.zeroclaw do upstream. O nixpkgs dele é o unstable do próprio
+    # flake (o ZeroClaw é desenvolvido contra ele) — sem `follows`.
+    ericai.url = "path:/home/lafco/Projects/ericai";
+
     # ══ Lix (alternativa ao Nix oficial) ═══════════════════════════════
     # Se preferir o Lix (fork comunitário), descomente e adicione o módulo
     # abaixo à lista `modules` de cada host. É drop-in: o resto não muda.
@@ -114,6 +119,8 @@
           ./modules/nixos/database.nix
           ./modules/nixos/remote.nix
           ./modules/nixos/flatpak.nix
+          ./modules/nixos/ericai.nix
+          inputs.ericai.nixosModules.ericai
           nix-flatpak.nixosModules.nix-flatpak
           disko.nixosModules.disko
           sops-nix.nixosModules.sops
