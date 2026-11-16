@@ -1,7 +1,11 @@
-# T3 Code desktop (Electron) — AppImage do release oficial do GitHub.
+# T3 Code desktop (Electron) — AppImage do release do nosso repo.
 #
-# Projeto: pingdotgg/t3code (MIT, https://t3.codes), app desktop para coding
-# agents do time do T3 (T3 Chat). Não existe no nixpkgs.
+# Projeto original: pingdotgg/t3code (MIT, https://t3.codes), app desktop para
+# coding agents do time do T3 (T3 Chat). Não existe no nixpkgs. Este pacote usa
+# o build do nosso repositório: lafco/czede — base achatada no upstream v0.1.9,
+# onde ficam as modificações. O AppImage é gerado pelo workflow
+# `.github/workflows/release-appimage.yml` do próprio czede (runner hospedado do
+# GitHub), que publica `T3-Code-<versão>-x86_64.AppImage` no release do tag.
 #
 # Por que extract + wrapAppImage e não wrapType2: o `wrapAppImage` do nixpkgs
 # extrai o AppImage em ~/.cache/appimage-run na primeira execução — extraindo
@@ -18,11 +22,13 @@
 #   - o app roda via XWayland por padrão; para Wayland nativo, o PKGBUILD do
 #     AUR passa `--enable-features=UseOzonePlatform --ozone-platform=wayland`.
 #
-# Bump manual:
-#   1. última versão: `gh release view --repo pingdotgg/t3code`
+# Bump manual (a partir do repo czede):
+#   1. tag nova: `git tag -a v<versão>-fork.<n> -m ... && git push origin <tag>`
+#      — o workflow builda e publica o AppImage no release do tag;
+#   2. versão publicada: `gh release list --repo lafco/czede`
 #      (asset `T3-Code-<versão>-x86_64.AppImage`);
-#   2. hash: nix store prefetch-file --json --hash-type sha256 <url>;
-#   3. atualize `version` e `hash` abaixo.
+#   3. hash: nix store prefetch-file --json --hash-type sha256 <url>;
+#   4. atualize `version` e `hash` abaixo.
 {
   lib,
   appimageTools,
@@ -30,10 +36,10 @@
 }:
 let
   pname = "t3code";
-  version = "0.1.9";
+  version = "0.1.9-fork.2";
   src = fetchurl {
-    url = "https://github.com/pingdotgg/t3code/releases/download/v${version}/T3-Code-${version}-x86_64.AppImage";
-    hash = "sha256-0KtW3z4zjyQoSENWISl/2WOjNxWw2CCNvwg5lllXLYE=";
+    url = "https://github.com/lafco/czede/releases/download/v${version}/T3-Code-${version}-x86_64.AppImage";
+    hash = "sha256-uTZpcUXV6n1Dr0va/PwhhGeoAx4dutrTNmA9dpYqGJo=";
   };
   contents = appimageTools.extract { inherit pname version src; };
 

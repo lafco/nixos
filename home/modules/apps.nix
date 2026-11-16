@@ -126,7 +126,7 @@ in
     # (zed.brimdata.io), não o editor do zed.dev — e é por isso que o binário
     # do editor se chama `zeditor` no nixpkgs.
     # T3 Code: app desktop para coding agents do time do T3 (Electron,
-    # AppImage do release oficial) — ver pkgs/t3code.nix.
+    # AppImage do release do nosso repo lafco/czede) — ver pkgs/t3code.nix.
     t3code
     # O updater interno é desativado pelo overlay: o AppImage fica imutável no
     # /nix/store e novas versões são aplicadas pelo flake/Nix.

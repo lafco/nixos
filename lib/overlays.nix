@@ -74,8 +74,9 @@
       # pkgs/fastmail-desktop.nix (instruções de bump lá).
       fastmailDesktop = final.callPackage ../pkgs/fastmail-desktop.nix { };
 
-      # T3 Code desktop: AppImage do release oficial (MIT, pingdotgg/t3code).
-      # Ver pkgs/t3code.nix (limitações em NixOS + instruções de bump lá).
+      # T3 Code desktop: AppImage do release do nosso repo (MIT, fork próprio
+      # de pingdotgg/t3code). Ver pkgs/t3code.nix (limitações em NixOS +
+      # instruções de bump lá).
       t3code = final.callPackage ../pkgs/t3code.nix { };
     in
     {
