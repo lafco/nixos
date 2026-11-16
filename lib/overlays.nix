@@ -74,14 +74,14 @@
       # pkgs/fastmail-desktop.nix (instruções de bump lá).
       fastmailDesktop = final.callPackage ../pkgs/fastmail-desktop.nix { };
 
-      # Och: fork/rebrand do OpenChamber desktop (MIT), AppImage do release do
-      # fork. Ver pkgs/och.nix (fork, limitações em NixOS + bump lá).
-      och = final.callPackage ../pkgs/och.nix { };
+      # T3 Code desktop: AppImage do release oficial (MIT, pingdotgg/t3code).
+      # Ver pkgs/t3code.nix (limitações em NixOS + instruções de bump lá).
+      t3code = final.callPackage ../pkgs/t3code.nix { };
     in
     {
       ankama-launcher = ankamaLauncher;
       fastmail-desktop = fastmailDesktop;
-      inherit och;
+      inherit t3code;
 
       # OpenCode v2 (binário pré-compilado do npm oficial) — o nixpkgs só tem a
       # série 1.x. Consumido por home/modules/ai.nix. Ver pkgs/opencode-v2.nix.

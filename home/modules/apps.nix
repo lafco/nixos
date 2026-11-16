@@ -1,4 +1,4 @@
-# Apps de desktop: Firefox (declarativo) + 1Password + Fastmail + IDEs (Zed, Och)
+# Apps de desktop: Firefox (declarativo) + 1Password + Fastmail + IDEs (Zed, T3 Code)
 # Firefox: extensões e preferências versionadas; login/sync continua manual (1x).
 # 1Password: GUI e CLI vêm dos módulos do NixOS (programs._1password e
 # _1password-gui, em modules/nixos/desktop.nix) — aqui ficam a extensão do
@@ -125,10 +125,9 @@ in
     # NÃO usar pkgs.zed: esse é o CLI do data lake da Brim Data
     # (zed.brimdata.io), não o editor do zed.dev — e é por isso que o binário
     # do editor se chama `zeditor` no nixpkgs.
-    # Och: fork/rebrand do OpenChamber, IDE agêntica em cima do OpenCode
-    # (Electron, AppImage do release do fork) — ver pkgs/och.nix. Em teste: o
-    # app embute o próprio OpenCode CLI, então não usa o pkgs/opencode-v2 daqui.
-    och
+    # T3 Code: app desktop para coding agents do time do T3 (Electron,
+    # AppImage do release oficial) — ver pkgs/t3code.nix.
+    t3code
     # O updater interno é desativado pelo overlay: o AppImage fica imutável no
     # /nix/store e novas versões são aplicadas pelo flake/Nix.
     ankama-launcher # jogos Ankama (Dofus, Waven, Wakfu…) — AppImage + wine
@@ -156,13 +155,13 @@ in
     discord
   ];
 
-  # Ícone do och no GNOME: o pacote instala och.png em share/icons/hicolor,
+  # Ícone do T3 Code no GNOME: o pacote instala o .png em share/icons/hicolor,
   # mas o home-manager não gera o icon-theme.cache do hicolor no profile — e o
   # GNOME às vezes não resolve ícones de pacote sem o cache (fica o ícone
   # genérico). Copiar para ~/.local/share/icons (XDG_DATA_HOME, sempre varrido)
   # garante que o app apareça com ícone no grid/dock.
-  xdg.dataFile."icons/hicolor/512x512/apps/och.png".source =
-    "${pkgs.och}/share/icons/hicolor/512x512/apps/och.png";
+  xdg.dataFile."icons/hicolor/512x512/apps/t3code.png".source =
+    "${pkgs.t3code}/share/icons/hicolor/512x512/apps/t3code.png";
 
   # Native messaging do 1Password: arquivo no diretório que o Firefox lê.
   #
