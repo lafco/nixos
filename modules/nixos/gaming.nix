@@ -28,5 +28,13 @@
     gamescope # microcompositor p/ jogos (upscaling, HDR, etc.)
     radeontop # monitor de uso da GPU no terminal
     vulkan-tools # vulkaninfo para diagnosticar Vulkan
+
+    # Rodar instaladores .exe de repack (Inno Setup) e jogos fora do Steam.
+    # wine-wow64 roda binários 32-bit no build 64-bit, que é o caso da
+    # maioria dos instaladores.
+    wineWow64Packages.staging
+    winetricks # ajustes no prefix wine (vcrun, dotnet, dxvk...)
+    lutris # front-end para jogos não-Steam
+    protontricks # winetricks dentro de um prefix Proton
   ];
 }
