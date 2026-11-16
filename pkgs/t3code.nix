@@ -36,10 +36,10 @@
 }:
 let
   pname = "t3code";
-  version = "0.1.9-fork.3";
+  version = "0.1.9-fork.4";
   src = fetchurl {
     url = "https://github.com/lafco/czede/releases/download/v${version}/czede-${version}-x86_64.AppImage";
-    hash = "sha256-PeanaaI3lxN+u/PcUaG4U1+wHiTZoCbNnbkRiIuAXIw=";
+    hash = "sha256-5g93RdB7CcFDhvYoBALt8OWC+U34vHPRgxnrx0Zddmw=";
   };
   contents = appimageTools.extract { inherit pname version src; };
 
