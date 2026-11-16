@@ -318,13 +318,13 @@ let
     processHint = "kangen-desktop";
   };
 
-  # Super+i: t3 code na 1ª área, mesmo caso do kangen (AppImage de Electron).
+  # Super+i: czede na 1ª área, mesmo caso do kangen (AppImage de Electron).
   # O padrão casa `t3code --no-sandbox` — nome do binário interno do AppImage
   # (o .desktop executa com `env T3CODE_DISABLE_AUTO_UPDATE=1` na frente,
   # então o argv final continua sendo `t3code --no-sandbox`).
   t3Open = focusAppOpen {
     name = "t3-open";
-    appId = "t3code.desktop";
+    appId = "czede.desktop";
     workspace = 0; # 1ª área
     processPattern = "t3code --no-sandbox$";
     processHint = "t3code --no-sandbox";
@@ -546,12 +546,12 @@ in
     #   DISPLAY=:0 XAUTHORITY=~/.mutter-Xwaylandauth.* xprop -id <id> WM_CLASS
     # Jogos da Steam entram via gameAutoMove (ver steamGames no let).
     #
-    # O t3 code fica na área 1 (junto do wezterm): é a área do Super+i e
+    # O czede fica na área 1 (junto do wezterm): é a área do Super+i e
     # garante que abrir pelo dock/menu/link caia no mesmo lugar do binding.
     "org/gnome/shell/extensions/auto-move-windows" = {
       application-list = [
         "org.wezfurlong.wezterm.desktop:1"
-        "t3code.desktop:1"
+        "czede.desktop:1"
         "firefox.desktop:2"
         "steam.desktop:3"
         "ankama-launcher.desktop:3"

@@ -125,8 +125,8 @@ in
     # NÃO usar pkgs.zed: esse é o CLI do data lake da Brim Data
     # (zed.brimdata.io), não o editor do zed.dev — e é por isso que o binário
     # do editor se chama `zeditor` no nixpkgs.
-    # T3 Code: app desktop para coding agents do time do T3 (Electron,
-    # AppImage do release do nosso repo lafco/czede) — ver pkgs/t3code.nix.
+    # czede: nosso fork do T3 Code, app desktop para coding agents (Electron,
+    # AppImage do release do repo lafco/czede) — ver pkgs/t3code.nix.
     t3code
     # O updater interno é desativado pelo overlay: o AppImage fica imutável no
     # /nix/store e novas versões são aplicadas pelo flake/Nix.
@@ -160,6 +160,8 @@ in
   # GNOME às vezes não resolve ícones de pacote sem o cache (fica o ícone
   # genérico). Copiar para ~/.local/share/icons (XDG_DATA_HOME, sempre varrido)
   # garante que o app apareça com ícone no grid/dock.
+  # O arquivo dentro do AppImage continua t3code.png (vem do executableName do
+  # electron-builder); o nome visível vem do .desktop (Name=czede).
   xdg.dataFile."icons/hicolor/512x512/apps/t3code.png".source =
     "${pkgs.t3code}/share/icons/hicolor/512x512/apps/t3code.png";
 

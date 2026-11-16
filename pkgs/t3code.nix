@@ -26,7 +26,7 @@
 #   1. tag nova: `git tag -a v<versão>-fork.<n> -m ... && git push origin <tag>`
 #      — o workflow builda e publica o AppImage no release do tag;
 #   2. versão publicada: `gh release list --repo lafco/czede`
-#      (asset `T3-Code-<versão>-x86_64.AppImage`);
+#      (asset `czede-<versão>-x86_64.AppImage`);
 #   3. hash: nix store prefetch-file --json --hash-type sha256 <url>;
 #   4. atualize `version` e `hash` abaixo.
 {
@@ -36,26 +36,29 @@
 }:
 let
   pname = "t3code";
-  version = "0.1.9-fork.2";
+  version = "0.1.9-fork.3";
   src = fetchurl {
-    url = "https://github.com/lafco/czede/releases/download/v${version}/T3-Code-${version}-x86_64.AppImage";
-    hash = "sha256-uTZpcUXV6n1Dr0va/PwhhGeoAx4dutrTNmA9dpYqGJo=";
+    url = "https://github.com/lafco/czede/releases/download/v${version}/czede-${version}-x86_64.AppImage";
+    hash = "sha256-PeanaaI3lxN+u/PcUaG4U1+wHiTZoCbNnbkRiIuAXIw=";
   };
   contents = appimageTools.extract { inherit pname version src; };
 
-  # .desktop próprio em vez do upstream (que traz Exec=AppRun %U): Exec com
+  # .desktop próprio em vez do que o AppImage traz (Exec=AppRun %U): Exec com
   # --no-sandbox (chrome-sandbox sem setuid no store) e updater desligado via
-  # env. StartupWMClass e MimeType vêm do .desktop do upstream.
-  desktopFile = builtins.toFile "t3code.desktop" ''
+  # env. O binário dentro do AppImage continua `t3code` (é o executableName do
+  # electron-builder, e o ícone acompanha: hicolor/*/apps/t3code.png).
+  # StartupWMClass casa com o app.setDesktopName do app:
+  # com.lafco.czede.desktop -> WM_CLASS com.lafco.czede.
+  desktopFile = builtins.toFile "czede.desktop" ''
     [Desktop Entry]
-    Name=T3 Code
+    Name=czede
     Exec=env T3CODE_DISABLE_AUTO_UPDATE=1 t3code --no-sandbox %U
     Terminal=false
     Type=Application
     Icon=t3code
-    StartupWMClass=t3code
+    StartupWMClass=com.lafco.czede
     Comment=Desktop app for coding agents
-    MimeType=x-scheme-handler/t3code;x-scheme-handler/t3code-dev;
+    MimeType=x-scheme-handler/czede;x-scheme-handler/czede-dev;
     Categories=Development;
   '';
 in
@@ -64,7 +67,7 @@ appimageTools.wrapAppImage {
   src = contents;
 
   extraInstallCommands = ''
-    install -m 444 -D ${desktopFile} $out/share/applications/t3code.desktop
+    install -m 444 -D ${desktopFile} $out/share/applications/czede.desktop
 
     # Ícones em todos os tamanhos que o AppImage traz (16..512). O mkdir é
     # necessário: `cp -r src dest/` com dest inexistente ACHATA o conteúdo da
