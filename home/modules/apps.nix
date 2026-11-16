@@ -1,4 +1,4 @@
-# Apps de desktop: Firefox (declarativo) + 1Password + Fastmail + IDEs (Zed, OpenChamber)
+# Apps de desktop: Firefox (declarativo) + 1Password + Fastmail + IDEs (Zed, Och)
 # Firefox: extensões e preferências versionadas; login/sync continua manual (1x).
 # 1Password: GUI e CLI vêm dos módulos do NixOS (programs._1password e
 # _1password-gui, em modules/nixos/desktop.nix) — aqui ficam a extensão do
@@ -125,33 +125,44 @@ in
     # NÃO usar pkgs.zed: esse é o CLI do data lake da Brim Data
     # (zed.brimdata.io), não o editor do zed.dev — e é por isso que o binário
     # do editor se chama `zeditor` no nixpkgs.
-    # OpenChamber: IDE agêntica em cima do OpenCode (Electron, AppImage do
-    # release oficial) — ver pkgs/openchamber.nix. Em teste: o app embute o
-    # próprio OpenCode CLI, então não usa o pkgs/opencode-v2 daqui.
-    openchamber
+    # Och: fork/rebrand do OpenChamber, IDE agêntica em cima do OpenCode
+    # (Electron, AppImage do release do fork) — ver pkgs/och.nix. Em teste: o
+    # app embute o próprio OpenCode CLI, então não usa o pkgs/opencode-v2 daqui.
+    och
     # O updater interno é desativado pelo overlay: o AppImage fica imutável no
     # /nix/store e novas versões são aplicadas pelo flake/Nix.
     ankama-launcher # jogos Ankama (Dofus, Waven, Wakfu…) — AppImage + wine
-    # Discord oficial (Electron) com o client mod Vencord (plugins que desligam
-    # partes da UI: Nitro upsell, presentes, etc.), configurado em
-    # Configurações -> Vencord.
+    # Discord oficial (Electron). SEM Vencord e SEM OpenAsar (2026-11-16):
     #
-    # SEM OpenAsar: a versão pinada no nixpkgs (0-unstable-2026-07-24, que é o
-    # HEAD do upstream) quebra com o Electron 43 do Discord 1.0.138 — o
-    # `ipcRenderer.send('cs', c)` do src/config/preload.js manda um objeto não
-    # clonável pro processo principal, o setup aborta com "An object could not
-    # be cloned" e a janela fica preta (só o BACKGROUND_COLOR do settings). Não
-    # é GPU nem Wayland: preto em XWayland, em Wayland nativo e com
-    # --disable-gpu; sem OpenAsar a UI desenha em qualquer um dos três.
-    # Reative `withOpenASAR = true` quando o upstream corrigir.
+    # - OpenAsar (pinado no nixpkgs, 0-unstable-2026-07-24) quebra com o
+    #   Electron do Discord 1.0.138 — o `ipcRenderer.send('cs', c)` manda um
+    #   objeto não clonável, o setup aborta e a janela fica preta.
+    # - Vencord (testados 1.15.3 do stable e 1.15.4 do unstable): o patcher
+    #   quebra no bundle do 1.0.138 ("i.A is not a constructor"), o renderer
+    #   nunca pinta o primeiro frame e o main process nunca chama
+    #   window.show() — o splash ("Discord Updater") fica para sempre e o
+    #   dash mostra o app como "starting..." eternamente (a janela principal
+    #   nunca aparece). Não é o config do usuário: reproduz com ~/.config/discord
+    #   zerado.
+    #
+    # Reative `withVencord = true` quando sair um Vencord compatível com o
+    # bundle do 1.0.138. Até lá os plugins de UI (NoTrack, esconder Nitro
+    # upsell) ficam desligados.
+    #
     # O pacote é unfree (nixpkgs.config.allowUnfree = true em
     # modules/nixos/common.nix) e o id do .desktop é `discord.desktop`
     # (name = pname em makeDesktopItem, StartupWMClass=discord) — é esse id que
     # vai no favorite-apps/auto-move-windows de home/modules/gnome.nix.
-    (pkgs.discord.override {
-      withVencord = true;
-    })
+    discord
   ];
+
+  # Ícone do och no GNOME: o pacote instala och.png em share/icons/hicolor,
+  # mas o home-manager não gera o icon-theme.cache do hicolor no profile — e o
+  # GNOME às vezes não resolve ícones de pacote sem o cache (fica o ícone
+  # genérico). Copiar para ~/.local/share/icons (XDG_DATA_HOME, sempre varrido)
+  # garante que o app apareça com ícone no grid/dock.
+  xdg.dataFile."icons/hicolor/512x512/apps/och.png".source =
+    "${pkgs.och}/share/icons/hicolor/512x512/apps/och.png";
 
   # Native messaging do 1Password: arquivo no diretório que o Firefox lê.
   #

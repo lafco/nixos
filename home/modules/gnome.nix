@@ -15,7 +15,7 @@
 #   Super+m           -> spotify (área 4)             [favorito 3 do dash]
 #   Super+d           -> discord (área 4)             [favorito 4 do dash]
 #   Super+k           -> kangen (área 4)              [custom: troca de área + foca/abre]
-#   Super+o           -> openchamber (área 1)         [custom: troca de área + foca/abre]
+#   Super+o           -> och (área 1)              [custom: troca de área + foca/abre]
 #   Super+Shift+k     -> xkill                               [custom]
 #   Super+q           -> fechar janela (soma ao Alt+F4 do GNOME)
 #   Super+t           -> fullscreen
@@ -35,7 +35,7 @@
 #   Super+equal/minus -> volume via wpctl (sem o OSD do GNOME)
 #
 # Além dos keybinds, este módulo fixa 4 áreas de trabalho estáticas e usa a
-# extensão auto-move-windows para pinar apps na sua área (wezterm/openchamber
+# extensão auto-move-windows para pinar apps na sua área (wezterm/och
 # -> 1, firefox -> 2, steam/ankama/jogos -> 3, spotify/discord/kangen -> 4).
 # Exige dynamic-workspaces = false: com áreas dinâmicas os números mudam quando
 # uma área fica vazia.
@@ -67,9 +67,9 @@
 # nova — a dedup ("focar se aberto, senão abrir") fica por conta do app.activate()
 # do próprio Shell. Ver o custom "Kangen" em `customs` e o kangenOpen no `let`.
 #
-# O openchamber (Super+o) é o MESMO caso, com uma diferença: o AppImage do
+# O och (Super+o) é o MESMO caso, com uma diferença: o AppImage do
 # Electron leva alguns segundos no primeiro start, então trocar de área antes
-# de lançar evita o mesmo "demorado" do kangen. Ver openchamberOpen no `let` e
+# de lançar evita o mesmo "demorado" do kangen. Ver ochOpen no `let` e
 # o pin dele na área 1 (auto-move-windows) — sem o pin, o launcher fora do
 # binding (dock, menu, link) abriria na área atual.
 #
@@ -131,8 +131,8 @@ let
       binding = "<Super>k";
     }
     {
-      name = "OpenChamber";
-      command = "openchamber-open";
+      name = "Och";
+      command = "och-open";
       binding = "<Super>o";
     }
   ];
@@ -183,7 +183,7 @@ let
     "gnome-shell/extensions/${focusExtensionUuid}/metadata.json".text = builtins.toJSON {
       uuid = focusExtensionUuid;
       name = "App Focus";
-      description = "D-Bus para focar/abrir apps numa área (Super+k → kangen, Super+o → openchamber)";
+      description = "D-Bus para focar/abrir apps numa área (Super+k → kangen, Super+o → och)";
       "shell-version" = [ "50" ];
       version = 1;
     };
@@ -235,7 +235,7 @@ let
             return 'not-found';
 
           // Troca para a área ANTES de ativar: no primeiro launch o kangen
-          // demora segundos (e o openchamber, no primeiro start do AppImage)
+          // demora segundos (e o och, no primeiro start do AppImage)
           // e o feedback precisa ser imediato.
           const ws = global.workspace_manager.get_workspace_by_index(workspace);
           if (ws)
@@ -249,7 +249,7 @@ let
   };
 
   # Scripts dos customs "troca de área + foca/abre" (Super+k → kangen,
-  # Super+o → openchamber). Um writeShellApplication por app, gerados da mesma
+  # Super+o → och). Um writeShellApplication por app, gerados da mesma
   # receita: o que muda é o id do .desktop, a área e o padrão de processo do
   # fallback.
   #
@@ -266,7 +266,7 @@ let
   #    app (dedup por pgrep).
   #
   # `processPattern` é regex do pgrep -f: ancore o final (`$`) para não casar
-  # com processo filho (o Electron do openchamber, por exemplo, roda zygotes
+  # com processo filho (o Electron do och, por exemplo, roda zygotes
   # com outro argv).
   focusAppOpen =
     {
@@ -317,12 +317,14 @@ let
     processHint = "kangen-desktop";
   };
 
-  # Super+o: openchamber na 1ª área. O .desktop é o do pkgs/openchamber.nix
-  # (`Exec=openchamber --no-sandbox %U`) e o padrão casa só o processo
-  # principal: os zygotes/renderers do Electron têm argv próprio.
-  openchamberOpen = focusAppOpen {
-    name = "openchamber-open";
-    appId = "openchamber.desktop";
+  # Super+o: och na 1ª área. O .desktop é o do pkgs/och.nix
+  # (`Exec=och --no-sandbox %U`). O padrão casa `openchamber` e não `och`
+  # porque o wrapper é só a entrada do AppImage: o processo principal que
+  # sobra é o binário do Electron, que segue o nome do upstream (rebrand é no
+  # .desktop, não no binário) — os zygotes/renderers têm argv próprio.
+  ochOpen = focusAppOpen {
+    name = "och-open";
+    appId = "och.desktop";
     workspace = 0; # 1ª área
     processPattern = "openchamber --no-sandbox$";
     processHint = "openchamber --no-sandbox";
@@ -393,14 +395,14 @@ in
 {
   # O appfinder do Super+a vinha do desktopManager.xfce (removido do repo) —
   # agora é instalado direto. O Papirus é o icon-theme do GNOME (abaixo).
-  # O kangenOpen e o openchamberOpen são os scripts do Super+k e do Super+o
+  # O kangenOpen e o ochOpen são os scripts do Super+k e do Super+o
   # (troca de área + foca/abre via a extensão app-focus); entram no profile para
   # ficar no PATH da sessão do GNOME Shell.
   home.packages = [
     pkgs.xfce4-appfinder
     pkgs.papirus-icon-theme
     kangenOpen
-    openchamberOpen
+    ochOpen
   ];
 
   # .desktop dos jogos da Steam (ver o comentário em steamGames acima), do
@@ -418,7 +420,7 @@ in
       custom-keybindings = customPaths;
 
       # Super+o é default do rotate-video-lock-static (GNOME 44+) e, por ser
-      # um bind interno do media-keys, GANHA do custom do openchamber — sem
+      # um bind interno do media-keys, GANHA do custom do och — sem
       # isso a tecla nunca chega no custom6. Desligado.
       rotate-video-lock-static = noKeys;
     };
@@ -499,7 +501,7 @@ in
         "auto-move-windows@gnome-shell-extensions.gcampax.github.com"
         "dash-to-dock@micxgx.gmail.com"
         # Foca/abre apps pelo D-Bus da sessão — os Super+k/Super+o usam para o
-        # kangen e o openchamber (ver focusAppOpen no let).
+        # kangen e o och (ver focusAppOpen no let).
         "app-focus@lafco.dev"
       ];
 
@@ -544,12 +546,12 @@ in
     #   DISPLAY=:0 XAUTHORITY=~/.mutter-Xwaylandauth.* xprop -id <id> WM_CLASS
     # Jogos da Steam entram via gameAutoMove (ver steamGames no let).
     #
-    # O openchamber fica na área 1 (junto do wezterm): é a área do Super+o e
+    # O och fica na área 1 (junto do wezterm): é a área do Super+o e
     # garante que abrir pelo dock/menu/link caia no mesmo lugar do binding.
     "org/gnome/shell/extensions/auto-move-windows" = {
       application-list = [
         "org.wezfurlong.wezterm.desktop:1"
-        "openchamber.desktop:1"
+        "och.desktop:1"
         "firefox.desktop:2"
         "steam.desktop:3"
         "ankama-launcher.desktop:3"
