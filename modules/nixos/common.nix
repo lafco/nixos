@@ -4,8 +4,8 @@
   # Overlays compartilhados (pkgs.unstable.*) — definidos em lib/overlays.nix.
   nixpkgs.overlays = import ../../lib/overlays.nix { inherit inputs; };
 
-  # discord/ankama-launcher/proton-pass/fastmail-desktop (apps do home/modules)
-  # e o 1Password (módulo do NixOS) são unfree.
+  # discord/ankama-launcher/fastmail-desktop (apps do home/modules) e o
+  # 1Password (módulo do NixOS) são unfree.
   nixpkgs.config.allowUnfree = true;
 
   # Android SDK (androidenv) exige aceitar a licença da Google.

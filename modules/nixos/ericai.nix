@@ -20,8 +20,7 @@
   # zeroclaw-ericai já depende dele via after/requires abaixo).
   sops.useSystemdActivation = true;
 
-  services.zeroclaw.instances.ericai.environmentFile =
-    config.sops.secrets."zeroclaw/ericai-env".path;
+  services.zeroclaw.instances.ericai.environmentFile = config.sops.secrets."zeroclaw/ericai-env".path;
 
   # Sobe o zeroclaw-ericai depois dos segredos decriptados.
   systemd.services.zeroclaw-ericai = {

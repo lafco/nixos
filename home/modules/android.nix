@@ -21,7 +21,10 @@ let
   # read-only, então esses componentes precisam vir provisionados (o Gradle
   # não pode instalá-los sob demanda).
   android-composition = pkgs.androidenv.composeAndroidPackages {
-    platformVersions = [ "36" "37.0" ];
+    platformVersions = [
+      "36"
+      "37.0"
+    ];
     buildToolsVersions = [ "36.0.0" ];
     includeNDK = true;
     ndkVersions = [ "26.1.10909125" ];

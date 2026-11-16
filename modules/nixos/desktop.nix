@@ -5,9 +5,9 @@
 # única sessão. A config do desktop mora em home/modules/gnome.nix.
 { pkgs, ... }:
 {
-  # XWayland vem daqui: Steam, jogos da Steam e o Proton Pass rodam como
-  # clientes X11 sob a sessão Wayland (aparecem na lista de janelas do
-  # XWayland). Não é mais por causa de um desktop X11.
+  # XWayland vem daqui: Steam e jogos da Steam rodam como clientes X11 sob a
+  # sessão Wayland (aparecem na lista de janelas do XWayland). Não é mais por
+  # causa de um desktop X11.
   services.xserver = {
     enable = true;
     # Se um dia usar GPU NVIDIA, descomente:

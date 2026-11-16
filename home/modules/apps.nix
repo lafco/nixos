@@ -1,8 +1,9 @@
 # Apps de desktop: Firefox (declarativo) + 1Password + Fastmail + IDEs (Zed, OpenChamber)
 # Firefox: extensões e preferências versionadas; login/sync continua manual (1x).
 # 1Password: GUI e CLI vêm dos módulos do NixOS (programs._1password e
-# _1password-gui, em modules/nixos/desktop.nix) — aqui só a extensão do
-# Firefox, que é a parte que o home-manager instala declarativamente.
+# _1password-gui, em modules/nixos/desktop.nix) — aqui ficam a extensão do
+# Firefox e a entrada de autostart (xdg.autostart), as partes que o
+# home-manager instala declarativamente.
 #
 # O Zed é só o PACOTE: settings/keymap vêm do repo de
 # dotfiles via symlink (home/modules/dotfiles.nix), não do módulo
@@ -116,11 +117,6 @@ in
     # App oficial da Fastmail (Electron, unfree): é ele que abre os links
     # `mailto:` — o default fica em modules/nixos/desktop.nix.
     fastmail-desktop
-    # Proton Pass: por enquanto só o app desktop, SEM a extensão do Firefox
-    # (a extensão saiu de extensions.packages abaixo, em favor do 1Password).
-    # Fica até a migração das senhas terminar; depois pode sair daqui e do
-    # xdg.autostart mais abaixo.
-    pkgs.proton-pass # app desktop do Proton Pass (Linux) — NÃO é a extensão
     # Zed: o nixpkgs do estável (26.05) pinaria 1.3.6, mas o keymap do repo de
     # dotfiles foi escrito contra o Zed 1.16 (ver o comentário do outline::Toggle
     # em ~/dotfiles/zed/.config/zed/keymap.json). O unstable traz 1.17.2.
@@ -168,18 +164,18 @@ in
   # Início automático no login. O GNOME lê $XDG_CONFIG_HOME/autostart (spec
   # XDG), então uma entrada basta.
   #
-  # O Proton Pass tem um toggle "Launch at startup" na UI, mas ele chama
-  # app.setLoginItemSettings() do Electron — que no Linux é no-op. Verificado
-  # com o Electron 43 do próprio pacote: depois de `setLoginItemSettings({openAtLogin: true})`
-  # o `getLoginItemSettings().openAtLogin` continua false e nada é criado em
-  # ~/.config/autostart. Por isso a entrada é declarada aqui.
+  # O 1Password tem o toggle "Open 1Password automatically when I sign in to
+  # my computer" na UI, mas a entrada é declarada aqui de qualquer forma:
+  # fica versionada no repo e funciona desde o primeiro login, sem depender
+  # do app gravar em ~/.config/autostart por conta própria.
   #
-  # `entries` aponta para o .desktop do pacote em vez de uma cópia escrita à
-  # mão: nada para manter em sincronia com o upstream, e o `Exec=proton-pass %U`
-  # já resolve no PATH do perfil.
+  # `entries` aponta para o .desktop do pacote (instalado pelo módulo
+  # programs._1password-gui em modules/nixos/desktop.nix) em vez de uma cópia
+  # escrita à mão: nada para manter em sincronia com o upstream, e o
+  # `Exec=1password %U` já resolve no PATH do sistema.
   xdg.autostart = {
     enable = true;
-    entries = [ "${pkgs.proton-pass}/share/applications/proton-pass.desktop" ];
+    entries = [ "${pkgs._1password-gui}/share/applications/1password.desktop" ];
   };
 
   # Player de vídeo com aceleração de hardware na RX 7600 (VAAPI)
