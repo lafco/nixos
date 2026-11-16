@@ -15,6 +15,7 @@
 #   Super+m           -> spotify (área 4)             [favorito 3 do dash]
 #   Super+d           -> discord (área 4)             [favorito 4 do dash]
 #   Super+k           -> kangen (área 4)              [custom: troca de área + foca/abre]
+#   Super+o           -> openchamber (área 1)         [custom: troca de área + foca/abre]
 #   Super+Shift+k     -> xkill                               [custom]
 #   Super+q           -> fechar janela (soma ao Alt+F4 do GNOME)
 #   Super+t           -> fullscreen
@@ -34,10 +35,10 @@
 #   Super+equal/minus -> volume via wpctl (sem o OSD do GNOME)
 #
 # Além dos keybinds, este módulo fixa 4 áreas de trabalho estáticas e usa a
-# extensão auto-move-windows para pinar apps na sua área (wezterm -> 1,
-# firefox -> 2, steam/ankama/jogos -> 3, spotify/discord/kangen -> 4). Exige
-# dynamic-workspaces = false: com áreas dinâmicas os números mudam quando uma
-# área fica vazia.
+# extensão auto-move-windows para pinar apps na sua área (wezterm/openchamber
+# -> 1, firefox -> 2, steam/ankama/jogos -> 3, spotify/discord/kangen -> 4).
+# Exige dynamic-workspaces = false: com áreas dinâmicas os números mudam quando
+# uma área fica vazia.
 #
 # ⚠️ A lista usa o id do .desktop COM o sufixo `.desktop`. A extensão chama
 # Shell.AppSystem.lookup_app(id), que compara com g_app_info_get_id() (o id
@@ -61,14 +62,20 @@
 # espera a janela nascer (o binário é build DEBUG do Tauri/WebKitGTK, demora
 # segundos) e só então troca a área — por isso o Super+k parecia "demorado".
 # Virou custom: o script `kangen-open` (writeShellApplication) chama a extensão
-# `kangen-focus` (instalada por este módulo, ver kangenExtensionFiles no `let`),
+# `app-focus` (instalada por este módulo, ver focusExtensionFiles no `let`),
 # que troca para a área 4 NA HORA e então foca a janela existente ou lança uma
 # nova — a dedup ("focar se aberto, senão abrir") fica por conta do app.activate()
 # do próprio Shell. Ver o custom "Kangen" em `customs` e o kangenOpen no `let`.
 #
+# O openchamber (Super+o) é o MESMO caso, com uma diferença: o AppImage do
+# Electron leva alguns segundos no primeiro start, então trocar de área antes
+# de lançar evita o mesmo "demorado" do kangen. Ver openchamberOpen no `let` e
+# o pin dele na área 1 (auto-move-windows) — sem o pin, o launcher fora do
+# binding (dock, menu, link) abriria na área atual.
+#
 # ⚠️ O GNOME Wayland não expõe API para focar janela de fora (o wmctrl -a só
 # enxerga janelas X11, e o FocusApp do org.gnome.Shell só mexe no overview),
-# por isso a extensão: ela expõe dev.lafco.KangenFocus.ActivateOn no D-Bus da
+# por isso a extensão: ela expõe dev.lafco.AppFocus.ActivateOn no D-Bus da
 # sessão, com a mesma semântica do switch-to-application. Sem ela, cada aperto
 # abriria uma instância nova ou nem focaria a que existe.
 #
@@ -123,6 +130,11 @@ let
       command = "kangen-open";
       binding = "<Super>k";
     }
+    {
+      name = "OpenChamber";
+      command = "openchamber-open";
+      binding = "<Super>o";
+    }
   ];
 
   customId = i: "custom${toString i}";
@@ -144,39 +156,45 @@ let
   # Array vazio tipado: `[]` cru perde o tipo e o dconf recusa.
   noKeys = lib.gvariant.mkEmptyArray lib.gvariant.type.string;
 
-  # Extensão de GNOME Shell do Super+k: expõe dev.lafco.KangenFocus no D-Bus
-  # da sessão com o método ActivateOn(appId, área 0-based). O GNOME Wayland não
-  # tem API pública para focar janela de fora do Shell (wmctrl só vê janelas
-  # X11; org.gnome.Shell.FocusApp só mexe no overview), então a extensão faz o
-  # que o switch-to-application faria:
+  # Extensão de GNOME Shell dos customs que focam/abrem apps (Super+k, Super+o):
+  # expõe dev.lafco.AppFocus no D-Bus da sessão com o método
+  # ActivateOn(appId, área 0-based). O GNOME Wayland não tem API pública para
+  # focar janela de fora do Shell (wmctrl só vê janelas X11;
+  # org.gnome.Shell.FocusApp só mexe no overview), então a extensão faz o que o
+  # switch-to-application faria:
   #   1) troca para a área na hora (feedback imediato, sem esperar o launch do
-  #      binário DEBUG do Tauri);
+  #      binário DEBUG do Tauri nem o primeiro start do AppImage do Electron);
   #   2) app.activate(): foca a janela mais recente (trocando de área se
   #      preciso) ou lança uma nova — a dedup é do Shell, não de pgrep.
   #
+  # Um D-Bus só para os dois apps (e não um por app) porque o algoritmo é o
+  # mesmo: quem sabe app/área é o script, que só passa os argumentos.
+  #
   # Instalada em ~/.local/share/gnome-shell/extensions via xdg.dataFile (ver
-  # kangenExtensionFiles abaixo) e habilitada em enabled-extensions. Requer o
+  # focusExtensionFiles abaixo) e habilitada em enabled-extensions. Requer o
   # app.enableGTKAppId do kangen (aviso no bloco favorite-apps): sem a
   # associação janela↔app, o get_windows() volta vazio e cada aperto lança
   # uma instância nova.
-  kangenExtensionUuid = "kangen-focus@lafco.dev";
+  focusIface = "dev.lafco.AppFocus";
+  focusPath = "/dev/lafco/AppFocus";
+  focusExtensionUuid = "app-focus@lafco.dev";
 
-  kangenExtensionFiles = {
-    "gnome-shell/extensions/${kangenExtensionUuid}/metadata.json".text = builtins.toJSON {
-      uuid = kangenExtensionUuid;
-      name = "Kangen Focus";
-      description = "D-Bus para focar/abrir apps (usado pelo Super+k → kangen-open)";
+  focusExtensionFiles = {
+    "gnome-shell/extensions/${focusExtensionUuid}/metadata.json".text = builtins.toJSON {
+      uuid = focusExtensionUuid;
+      name = "App Focus";
+      description = "D-Bus para focar/abrir apps numa área (Super+k → kangen, Super+o → openchamber)";
       "shell-version" = [ "50" ];
       version = 1;
     };
-    "gnome-shell/extensions/${kangenExtensionUuid}/extension.js".text = ''
+    "gnome-shell/extensions/${focusExtensionUuid}/extension.js".text = ''
       import Gio from 'gi://Gio';
       import Shell from 'gi://Shell';
       import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
       const ifaceXml = `
       <node>
-        <interface name="dev.lafco.KangenFocus">
+        <interface name="${focusIface}">
           <method name="ActivateOn">
             <arg type="s" direction="in" name="appId"/>
             <arg type="u" direction="in" name="workspace"/>
@@ -185,15 +203,15 @@ let
         </interface>
       </node>`;
 
-      export default class KangenFocusExtension extends Extension {
+      export default class AppFocusExtension extends Extension {
         enable() {
           this._dbusImpl = Gio.DBusExportedObject.wrapJSObject(
             Gio.DBusInterfaceInfo.new_for_xml(ifaceXml),
             this,
           );
-          this._dbusImpl.export(Gio.DBus.session, '/dev/lafco/KangenFocus');
+          this._dbusImpl.export(Gio.DBus.session, '${focusPath}');
           this._nameId = Gio.DBus.session.own_name(
-            'dev.lafco.KangenFocus',
+            '${focusIface}',
             Gio.BusNameOwnerFlags.NONE,
             null,
             null,
@@ -217,7 +235,8 @@ let
             return 'not-found';
 
           // Troca para a área ANTES de ativar: no primeiro launch o kangen
-          // demora segundos e o feedback precisa ser imediato.
+          // demora segundos (e o openchamber, no primeiro start do AppImage)
+          // e o feedback precisa ser imediato.
           const ws = global.workspace_manager.get_workspace_by_index(workspace);
           if (ws)
             ws.activate(global.get_current_time());
@@ -229,47 +248,84 @@ let
     '';
   };
 
-  # Script do Super+k (custom "Kangen").
+  # Scripts dos customs "troca de área + foca/abre" (Super+k → kangen,
+  # Super+o → openchamber). Um writeShellApplication por app, gerados da mesma
+  # receita: o que muda é o id do .desktop, a área e o padrão de processo do
+  # fallback.
   #
   # ⚠️ Precisa ser um script (e não one-liner): o gsd-media-keys executa o
   # `command` do custom binding SEM shell (split de argv via
   # g_shell_parse_argv), então `;`/`||`/`>` não funcionam direto no command.
   #
-  # 1) Caminho normal: a extensão kangen-focus troca para a 4ª área NA HORA
-  #    (sem esperar o launch do kangen) e foca a janela existente — ou lança
-  #    uma nova se ainda não houver (dedup do Shell, mesma semântica do
+  # 1) Caminho normal: a extensão app-focus troca para a área NA HORA (sem
+  #    esperar o launch do app) e foca a janela existente — ou lança uma nova
+  #    se ainda não houver (dedup do Shell, mesma semântica do
   #    switch-to-application).
   # 2) Fallback se a extensão não estiver carregada (ex.: primeiro boot depois
   #    do deploy): troca de área via EWMH e abre só se não houver processo do
-  #    kangen (dedup por pgrep); o launcher kangen-desktop.sh sobe o servidor
-  #    e exec o binário.
-  kangenOpen = pkgs.writeShellApplication {
+  #    app (dedup por pgrep).
+  #
+  # `processPattern` é regex do pgrep -f: ancore o final (`$`) para não casar
+  # com processo filho (o Electron do openchamber, por exemplo, roda zygotes
+  # com outro argv).
+  focusAppOpen =
+    {
+      name,
+      appId,
+      workspace,
+      processPattern,
+      processHint,
+    }:
+    pkgs.writeShellApplication {
+      inherit name;
+      runtimeInputs = [
+        pkgs.glib.bin # gdbus (chama a extensão app-focus)
+        pkgs.wmctrl # troca de área via EWMH (fallback)
+        pkgs.procps # pgrep (dedup do fallback)
+        pkgs.gtk3 # gtk-launch (abre o .desktop do app no fallback)
+      ];
+      text = ''
+        APP_ID=${appId}
+        WORKSPACE=${toString workspace} # índice 0-based
+
+        # 1) Extensão: troca para a área na hora e foca/abre o app.
+        if gdbus call --session \
+             --dest ${focusIface} \
+             --object-path ${focusPath} \
+             --method ${focusIface}.ActivateOn "$APP_ID" "$WORKSPACE" \
+             >/dev/null 2>&1; then
+          exit 0
+        fi
+
+        # 2) Fallback sem a extensão: EWMH + só abre se não houver processo
+        # (${processHint}).
+        wmctrl -s "$WORKSPACE" || true
+        if ! pgrep -f '${processPattern}' >/dev/null 2>&1; then
+          gtk-launch "$APP_ID" || true
+        fi
+      '';
+    };
+
+  # Super+k: kangen na 4ª área. O binário é build DEBUG do Tauri (demora
+  # segundos), e o launcher kangen-desktop.sh sobe o servidor e exec o binário
+  # — por isso o padrão do pgrep é o processo `kangen-desktop`, não o argv todo.
+  kangenOpen = focusAppOpen {
     name = "kangen-open";
-    runtimeInputs = [
-      pkgs.glib.bin # gdbus (chama a extensão kangen-focus)
-      pkgs.wmctrl # troca de área via EWMH (fallback)
-      pkgs.procps # pgrep (dedup do fallback)
-      pkgs.gtk3 # gtk-launch (abre o .desktop do kangen no fallback)
-    ];
-    text = ''
-      APP_ID=dev.lafco.kangen.desktop
-      WORKSPACE=3 # 4ª área (índice 0-based)
+    appId = "dev.lafco.kangen.desktop";
+    workspace = 3; # 4ª área
+    processPattern = "kangen-desktop$";
+    processHint = "kangen-desktop";
+  };
 
-      # 1) Extensão: troca para a área na hora e foca/abre o kangen.
-      if gdbus call --session \
-           --dest dev.lafco.KangenFocus \
-           --object-path /dev/lafco/KangenFocus \
-           --method dev.lafco.KangenFocus.ActivateOn "$APP_ID" "$WORKSPACE" \
-           >/dev/null 2>&1; then
-        exit 0
-      fi
-
-      # 2) Fallback sem a extensão: EWMH + só abre se não houver processo.
-      wmctrl -s "$WORKSPACE" || true
-      if ! pgrep -f 'kangen-desktop$' >/dev/null 2>&1; then
-        gtk-launch "$APP_ID" || true
-      fi
-    '';
+  # Super+o: openchamber na 1ª área. O .desktop é o do pkgs/openchamber.nix
+  # (`Exec=openchamber --no-sandbox %U`) e o padrão casa só o processo
+  # principal: os zygotes/renderers do Electron têm argv próprio.
+  openchamberOpen = focusAppOpen {
+    name = "openchamber-open";
+    appId = "openchamber.desktop";
+    workspace = 0; # 1ª área
+    processPattern = "openchamber --no-sandbox$";
+    processHint = "openchamber --no-sandbox";
   };
 
   # Jogos da Steam fixados numa área de trabalho.
@@ -337,28 +393,34 @@ in
 {
   # O appfinder do Super+a vinha do desktopManager.xfce (removido do repo) —
   # agora é instalado direto. O Papirus é o icon-theme do GNOME (abaixo).
-  # O kangenOpen é o script do Super+k (troca de área + foca/abre o kangen via
-  # a extensão kangen-focus); entra no profile para ficar no PATH da sessão do
-  # GNOME Shell.
+  # O kangenOpen e o openchamberOpen são os scripts do Super+k e do Super+o
+  # (troca de área + foca/abre via a extensão app-focus); entram no profile para
+  # ficar no PATH da sessão do GNOME Shell.
   home.packages = [
     pkgs.xfce4-appfinder
     pkgs.papirus-icon-theme
     kangenOpen
+    openchamberOpen
   ];
 
   # .desktop dos jogos da Steam (ver o comentário em steamGames acima), do
-  # wezterm com herdr (ver weztermDesktop) e da extensão kangen-focus (ver
-  # kangenExtensionFiles no let).
+  # wezterm com herdr (ver weztermDesktop) e da extensão app-focus (ver
+  # focusExtensionFiles no let).
   xdg.dataFile =
     gameDesktopEntries
     // {
       ${weztermDesktopName}.text = weztermDesktop;
     }
-    // kangenExtensionFiles;
+    // focusExtensionFiles;
 
   dconf.settings = customSettings // {
     "org/gnome/settings-daemon/plugins/media-keys" = {
       custom-keybindings = customPaths;
+
+      # Super+o é default do rotate-video-lock-static (GNOME 44+) e, por ser
+      # um bind interno do media-keys, GANHA do custom do openchamber — sem
+      # isso a tecla nunca chega no custom6. Desligado.
+      rotate-video-lock-static = noKeys;
     };
 
     "org/gnome/desktop/wm/keybindings" = {
@@ -436,9 +498,9 @@ in
         "appindicatorsupport@rgcjonas.gmail.com"
         "auto-move-windows@gnome-shell-extensions.gcampax.github.com"
         "dash-to-dock@micxgx.gmail.com"
-        # Foca/abre apps pelo D-Bus da sessão — o Super+k usa para o kangen
-        # (ver kangenOpen no let).
-        "kangen-focus@lafco.dev"
+        # Foca/abre apps pelo D-Bus da sessão — os Super+k/Super+o usam para o
+        # kangen e o openchamber (ver focusAppOpen no let).
+        "app-focus@lafco.dev"
       ];
 
       # Ordem do dash — é ela que dá o índice do switch-to-application-N (1 =
@@ -481,9 +543,13 @@ in
     # aviso no topo do arquivo); para pegar o de uma janela aberta:
     #   DISPLAY=:0 XAUTHORITY=~/.mutter-Xwaylandauth.* xprop -id <id> WM_CLASS
     # Jogos da Steam entram via gameAutoMove (ver steamGames no let).
+    #
+    # O openchamber fica na área 1 (junto do wezterm): é a área do Super+o e
+    # garante que abrir pelo dock/menu/link caia no mesmo lugar do binding.
     "org/gnome/shell/extensions/auto-move-windows" = {
       application-list = [
         "org.wezfurlong.wezterm.desktop:1"
+        "openchamber.desktop:1"
         "firefox.desktop:2"
         "steam.desktop:3"
         "ankama-launcher.desktop:3"
