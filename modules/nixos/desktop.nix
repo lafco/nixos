@@ -100,8 +100,13 @@
   # O GNOME Web (Epiphany) vem da lista core-apps do módulo
   # desktopManager.gnome e é o ÚNICO outro browser do sistema. Removido: só o
   # firefox é usado.
+  #
+  # O seahorse ("Senhas e chaves" / Password and Keys) também sai: as senhas
+  # ficam no 1Password. O daemon gnome-keyring continua ligado (é ele que o
+  # GNOME/GDM/NetworkManager usam por baixo dos panos) — só a GUI é removida.
   environment.gnome.excludePackages = with pkgs; [
     epiphany
+    seahorse
   ];
 
   # 1Password: GUI + CLI (`op`) vêm dos módulos do nixpkgs, que instalam os
