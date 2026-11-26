@@ -103,11 +103,16 @@
   # desktopManager.gnome e é o ÚNICO outro browser do sistema. Removido: só o
   # firefox é usado.
   #
+  # O gnome-text-editor também sai: o editor padrão é o Zed (ver
+  # xdg.mime.defaultApplications abaixo), e sem o duplo clique abrindo o
+  # TextEditor não há motivo para o app ficar no sistema.
+  #
   # O seahorse ("Senhas e chaves" / Password and Keys) também sai: as senhas
   # ficam no 1Password. O daemon gnome-keyring continua ligado (é ele que o
   # GNOME/GDM/NetworkManager usam por baixo dos panos) — só a GUI é removida.
   environment.gnome.excludePackages = with pkgs; [
     epiphany
+    gnome-text-editor
     seahorse
   ];
 
@@ -137,11 +142,23 @@
   # do .desktop é `fastmail %U`, então o `mailto:` chega inteiro. Não há
   # `webcal:` aqui porque o .desktop do app só declara
   # `x-scheme-handler/mailto` e `x-scheme-handler/fastmail`.
+  #
+  # text/plain e application/x-zerosize são exatamente os dois tipos que o
+  # gnome-text-editor reivindicava (o segundo é o arquivo vazio, "novo
+  # documento"): os dois vão para o Zed, que é o editor padrão. O id é
+  # dev.zed.Zed.desktop (o binário do nixpkgs é `zeditor`; pkgs.zed é outro
+  # produto). O Zed mora no home.packages (home/modules/apps.nix) — o gio lê o
+  # .desktop do perfil do usuário, então funciona mesmo não estando no
+  # systemPackages. text/markdown já aponta para o Zed em
+  # ~/.config/mimeapps.list, que o próprio app escreve e que tem prioridade.
   xdg.mime.defaultApplications = {
     "text/html" = "firefox.desktop";
     "application/xhtml+xml" = "firefox.desktop";
     "x-scheme-handler/http" = "firefox.desktop";
     "x-scheme-handler/https" = "firefox.desktop";
     "x-scheme-handler/mailto" = "fastmail.desktop";
+
+    "text/plain" = "dev.zed.Zed.desktop";
+    "application/x-zerosize" = "dev.zed.Zed.desktop";
   };
 }
