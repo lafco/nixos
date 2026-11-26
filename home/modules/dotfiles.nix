@@ -19,7 +19,6 @@ in
     ".config/nvim".source = link "nvim/.config/nvim";
 
     # terminal
-    ".config/wezterm".source = link "wezterm/.config/wezterm";
     ".config/ghostty".source = link "ghostty/.config/ghostty";
     ".config/zellij".source = link "zellij/.config/zellij";
 
@@ -33,7 +32,11 @@ in
 
     # IA
     ".pi/agent".source = link "pi/.pi/agent";
-    ".config/herdr".source = link "herdr/.config/herdr";
+    # herdr-app: só o que é do usuário. O resto de ~/.config/herdr-app (view.json,
+    # shared.json, icons/, frame/, mods/, data/, *.d.ts) é escrito pelo app e
+    # seria lixo no checkout — por isso arquivo a arquivo, e não o diretório.
+    ".config/herdr-app/settings.json".source = link "herdr-app/.config/herdr-app/settings.json";
+    ".config/herdr-app/keys.json".source = link "herdr-app/.config/herdr-app/keys.json";
 
     # IDEs
     ".config/zed/settings.json".source = link "zed/.config/zed/settings.json";

@@ -9,7 +9,7 @@
 # dependem de X11 (xkill) só afetam clientes XWayland.
 #
 # Keybinds:
-#   Super+Return      -> terminal (wezterm + herdr)   [favorito 1 do dash]
+#   Super+Return      -> herdr (app desktop; foca ou abre)  [favorito 1 do dash]
 #   Super+e           -> gerenciador de arquivos (nautilus)  [custom]
 #   Super+f           -> firefox                      [favorito 2 do dash]
 #   Super+m           -> spotify (área 4)             [favorito 3 do dash]
@@ -36,7 +36,7 @@
 #   Super+equal/minus -> volume via wpctl (sem o OSD do GNOME)
 #
 # Além dos keybinds, este módulo fixa 4 áreas de trabalho estáticas e usa a
-# extensão auto-move-windows para pinar apps na sua área (wezterm/t3 code
+# extensão auto-move-windows para pinar apps na sua área (herdr/t3 code
 # -> 1, firefox -> 2, steam/ankama/jogos -> 3, spotify/discord/kangen -> 4).
 # Exige dynamic-workspaces = false: com áreas dinâmicas os números mudam quando
 # uma área fica vazia.
@@ -81,7 +81,7 @@
 # abriria uma instância nova ou nem focaria a que existe.
 #
 # Ctrl+Return NÃO é bound de propósito: tecla de binding do Shell é capturada
-# globalmente, então o app focado (wezterm, Firefox) nunca a receberia.
+# globalmente, então o app focado (herdr, Firefox) nunca a receberia.
 #
 # Jogos da Steam também são pinados (ver steamGames no let): como a Steam não
 # cria .desktop para jogos da loja, o módulo gera um por jogo para o GNOME
@@ -368,29 +368,6 @@ let
   );
 
   gameAutoMove = map (g: "${gameId g}.desktop:${toString g.workspace}") steamGames;
-
-  # .desktop do wezterm com o herdr.
-  #
-  # O entry do pacote é `Exec=wezterm start --cwd .` e o wezterm.lua dos
-  # dotfiles usa `default_prog = bash -l`: lançar pelo favorito abriria um bash
-  # em vez do herdr que o keybind usava. O arquivo é sobrescrito em
-  # ~/.local/share/applications (que tem prioridade sobre o do sistema), com o
-  # MESMO id e StartupWMClass — assim o auto-move-windows e o WindowTracker
-  # continuam associando a janela a este app.
-  weztermDesktopName = "applications/org.wezfurlong.wezterm.desktop";
-  weztermDesktop = ''
-    [Desktop Entry]
-    Name=WezTerm
-    Comment=Wez's Terminal Emulator
-    Keywords=shell;prompt;command;commandline;cmd;
-    Icon=org.wezfurlong.wezterm
-    StartupWMClass=org.wezfurlong.wezterm
-    TryExec=wezterm
-    Exec=wezterm start --cwd . -- herdr
-    Type=Application
-    Categories=System;TerminalEmulator;Utility;
-    Terminal=false
-  '';
 in
 {
   # O appfinder do Super+a vinha do desktopManager.xfce (removido do repo) —
@@ -405,15 +382,12 @@ in
     t3Open
   ];
 
-  # .desktop dos jogos da Steam (ver o comentário em steamGames acima), do
-  # wezterm com herdr (ver weztermDesktop) e da extensão app-focus (ver
-  # focusExtensionFiles no let).
-  xdg.dataFile =
-    gameDesktopEntries
-    // {
-      ${weztermDesktopName}.text = weztermDesktop;
-    }
-    // focusExtensionFiles;
+  # .desktop dos jogos da Steam (ver o comentário em steamGames acima) e da
+  # extensão app-focus (ver focusExtensionFiles no let). O .desktop do herdr
+  # NÃO é sobrescrito: o entry do pacote (unstable.herdr-desktop, em
+  # home/modules/ai.nix) já é `Exec=herdr-app` com `StartupWMClass=herdr-app`,
+  # que é exatamente o que o favorito e o auto-move-windows precisam.
+  xdg.dataFile = gameDesktopEntries // focusExtensionFiles;
 
   dconf.settings = customSettings // {
     "org/gnome/settings-daemon/plugins/media-keys" = {
@@ -470,7 +444,7 @@ in
     "org/gnome/shell/keybindings" = {
       # Super+1..4 fica para as áreas de trabalho — mas o
       # switch-to-application-N segue sendo o "focar se aberto, senão abrir" do
-      # Shell, só com outras teclas: 1 = favorito 1 (wezterm), 2 = favorito 2
+      # Shell, só com outras teclas: 1 = favorito 1 (herdr), 2 = favorito 2
       # (firefox), 3 = favorito 3 (spotify), 4 = favorito 4 (discord, área 4);
       # ver favorite-apps abaixo. O 5 (kangen) virou custom para trocar a área
       # antes de abrir (ver `customs`), então fica vazio.
@@ -506,7 +480,7 @@ in
       ];
 
       # Ordem do dash — é ela que dá o índice do switch-to-application-N (1 =
-      # wezterm, 2 = firefox, 3 = spotify, 4 = discord; o 5 = kangen fica só na
+      # herdr, 2 = firefox, 3 = spotify, 4 = discord; o 5 = kangen fica só na
       # dock, porque o bind dele virou custom), por isso a lista é declarativa.
       # O discord é `discord.desktop` (pkgs.discord; ver home/modules/apps.nix).
       # O kangen é `dev.lafco.kangen.desktop`, instalado pelo próprio projeto
@@ -517,7 +491,7 @@ in
       # está parado e cada Super+K lança uma nova instância.
       # Os dois entram no FIM para não renumerar os binds acima.
       favorite-apps = [
-        "org.wezfurlong.wezterm.desktop"
+        "herdr-app.desktop"
         "firefox.desktop"
         "spotify.desktop"
         "discord.desktop"
@@ -546,11 +520,11 @@ in
     #   DISPLAY=:0 XAUTHORITY=~/.mutter-Xwaylandauth.* xprop -id <id> WM_CLASS
     # Jogos da Steam entram via gameAutoMove (ver steamGames no let).
     #
-    # O czede fica na área 1 (junto do wezterm): é a área do Super+i e
+    # O czede fica na área 1 (junto do herdr): é a área do Super+i e
     # garante que abrir pelo dock/menu/link caia no mesmo lugar do binding.
     "org/gnome/shell/extensions/auto-move-windows" = {
       application-list = [
-        "org.wezfurlong.wezterm.desktop:1"
+        "herdr-app.desktop:1"
         "czede.desktop:1"
         "firefox.desktop:2"
         "steam.desktop:3"

@@ -53,13 +53,13 @@
   fonts.packages = with pkgs; [
     ubuntu-sans # fonte padrão do sistema (sans-serif)
     nerd-fonts.symbols-only # ícones do prompt starship
-    jetbrains-mono # fonte do wezterm (wezterm.lua)
+    jetbrains-mono # fonte dos terminais (herdr-app, ghostty)
 
     # Sem estas, CJK (部署指南) cai no bitmap 'Fixed' do font-misc-misc
     # (12x13ja.pcf.gz, fonte X11 de bitmap que só cobre JIS X 0208 — o resto
     # vira tofu) e não existe emoji nenhum no sistema. O Firefox/GTK usam o
-    # fontconfig, então basta instalar; o wezterm não usa, e por isso declara
-    # o fallback no wezterm.lua.
+    # fontconfig, então basta instalar; o ghostty declara a lista explícita no
+    # config dele (~/dotfiles/ghostty/.config/ghostty/config).
     noto-fonts-cjk-sans
     noto-fonts-color-emoji
   ];
@@ -77,15 +77,17 @@
     firefox
     # O gerenciador de arquivos do GNOME é o nautilus, que vem do módulo
     # desktopManager.gnome — é ele que o Super+e abre (home/modules/gnome.nix).
-    wezterm # terminal padrão; no systemPackages para estar no PATH da sessão
-    # gráfica (o home.packages do usuário nem sempre está no PATH do GDM)
+    #
+    # O terminal padrão é o herdr (app desktop), instalado por home.packages em
+    # home/modules/ai.nix — não precisa estar aqui: o que o GNOME usa é o
+    # .desktop do ~/.nix-profile, e é a partir dele que o herdr-app é lançado.
     yaru-theme # cursor "Yaru" do Ubuntu (setado em home/modules/gnome.nix)
 
     # Tray do GNOME: o GNOME Shell não mostra ícones de bandeja (blueman etc.)
     # sem esta extensão. Ela é habilitada via dconf em home/modules/gnome.nix.
     gnomeExtensions.appindicator
 
-    # Fixa apps em áreas de trabalho (wezterm -> 1, firefox -> 2, steam -> 3).
+    # Fixa apps em áreas de trabalho (herdr -> 1, firefox -> 2, steam -> 3).
     # Configurada em home/modules/gnome.nix; exige áreas estáticas.
     gnomeExtensions.auto-move-windows
 

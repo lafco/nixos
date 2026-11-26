@@ -140,7 +140,7 @@ Os dois repos têm papéis distintos:
 - **`~/nixos`** (este repo): sistema + home-manager. Aplicar mudanças:
   `sudo nixos-rebuild switch --flake ~/nixos#daily`.
 - **`~/dotfiles`** (`github:lafco/config`): os dotfiles em si (bash, nvim,
-  wezterm, zellij, starship…). **Editar aqui tem efeito imediato** (sem
+  herdr, zellij, starship…). **Editar aqui tem efeito imediato** (sem
   rebuild) — o home-manager cria symlinks para `~/dotfiles`.
 
 ## 5. Alternativa: instalação remota (nixos-anywhere)
