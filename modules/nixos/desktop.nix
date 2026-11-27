@@ -107,12 +107,16 @@
   # xdg.mime.defaultApplications abaixo), e sem o duplo clique abrindo o
   # TextEditor não há motivo para o app ficar no sistema.
   #
+  # O Papers (o viewer de PDF do GNOME, ex-Evince) também: foi substituído pelo
+  # Zathura (home/modules/apps.nix).
+  #
   # O seahorse ("Senhas e chaves" / Password and Keys) também sai: as senhas
   # ficam no 1Password. O daemon gnome-keyring continua ligado (é ele que o
   # GNOME/GDM/NetworkManager usam por baixo dos panos) — só a GUI é removida.
   environment.gnome.excludePackages = with pkgs; [
     epiphany
     gnome-text-editor
+    papers
     seahorse
   ];
 
@@ -160,5 +164,11 @@
 
     "text/plain" = "dev.zed.Zed.desktop";
     "application/x-zerosize" = "dev.zed.Zed.desktop";
+
+    # Leitor de PDF: Zathura. O id é o do .desktop do plugin mupdf, que é o
+    # que declara application/pdf (o org.pwmt.zathura.desktop genérico não
+    # declara MimeType; todos executam `zathura %U`). O pacote está em
+    # home/modules/apps.nix, junto dos plugins djvu/cb/ps.
+    "application/pdf" = "org.pwmt.zathura-pdf-mupdf.desktop";
   };
 }
