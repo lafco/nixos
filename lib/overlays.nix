@@ -73,16 +73,10 @@
       # O pacote local é uma cópia da receita do nixpkgs master (1.9.0). Ver
       # pkgs/fastmail-desktop.nix (instruções de bump lá).
       fastmailDesktop = final.callPackage ../pkgs/fastmail-desktop.nix { };
-
-      # T3 Code desktop: AppImage do release do nosso repo (MIT, fork próprio
-      # de pingdotgg/t3code). Ver pkgs/t3code.nix (limitações em NixOS +
-      # instruções de bump lá).
-      t3code = final.callPackage ../pkgs/t3code.nix { };
     in
     {
       ankama-launcher = ankamaLauncher;
       fastmail-desktop = fastmailDesktop;
-      inherit t3code;
 
       # OpenCode v2 (binário pré-compilado do npm oficial) — o nixpkgs só tem a
       # série 1.x. Consumido por home/modules/ai.nix. Ver pkgs/opencode-v2.nix.

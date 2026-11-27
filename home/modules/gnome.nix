@@ -15,7 +15,6 @@
 #   Super+m           -> spotify (área 4)             [favorito 3 do dash]
 #   Super+d           -> discord (área 4)             [favorito 4 do dash]
 #   Super+k           -> kangen (área 4)              [custom: troca de área + foca/abre]
-#   Super+i           -> t3 code (área 1)             [custom: troca de área + foca/abre]
 #   Super+o           -> livre (era o och; default do rotate-video desligado abaixo)
 #   Super+Shift+k     -> xkill                               [custom]
 #   Super+q           -> fechar janela (soma ao Alt+F4 do GNOME)
@@ -36,7 +35,7 @@
 #   Super+equal/minus -> volume via wpctl (sem o OSD do GNOME)
 #
 # Além dos keybinds, este módulo fixa 4 áreas de trabalho estáticas e usa a
-# extensão auto-move-windows para pinar apps na sua área (herdr/t3 code
+# extensão auto-move-windows para pinar apps na sua área (herdr
 # -> 1, firefox -> 2, steam/ankama/jogos -> 3, spotify/discord/kangen -> 4).
 # Exige dynamic-workspaces = false: com áreas dinâmicas os números mudam quando
 # uma área fica vazia.
@@ -67,12 +66,6 @@
 # que troca para a área 4 NA HORA e então foca a janela existente ou lança uma
 # nova — a dedup ("focar se aberto, senão abrir") fica por conta do app.activate()
 # do próprio Shell. Ver o custom "Kangen" em `customs` e o kangenOpen no `let`.
-#
-# O t3 code (Super+i) é o MESMO caso do kangen: o AppImage do Electron leva
-# alguns segundos no primeiro start, então trocar de área antes de lançar
-# evita o mesmo "demorado". Ver t3Open no `let` e o pin dele na área 1
-# (auto-move-windows) — sem o pin, o launcher fora do binding (dock, menu,
-# link) abriria na área atual. Ver t3Open no `let`.
 #
 # ⚠️ O GNOME Wayland não expõe API para focar janela de fora (o wmctrl -a só
 # enxerga janelas X11, e o FocusApp do org.gnome.Shell só mexe no overview),
@@ -131,11 +124,6 @@ let
       command = "kangen-open";
       binding = "<Super>k";
     }
-    {
-      name = "T3 Code";
-      command = "t3-open";
-      binding = "<Super>i";
-    }
   ];
 
   customId = i: "custom${toString i}";
@@ -184,7 +172,7 @@ let
     "gnome-shell/extensions/${focusExtensionUuid}/metadata.json".text = builtins.toJSON {
       uuid = focusExtensionUuid;
       name = "App Focus";
-      description = "D-Bus para focar/abrir apps numa área (Super+k → kangen, Super+i → t3 code)";
+      description = "D-Bus para focar/abrir apps numa área (Super+k → kangen)";
       "shell-version" = [ "50" ];
       version = 1;
     };
@@ -236,8 +224,7 @@ let
             return 'not-found';
 
           // Troca para a área ANTES de ativar: no primeiro launch o kangen
-          // demora segundos (e o t3 code, no primeiro start do AppImage)
-          // e o feedback precisa ser imediato.
+          // demora segundos e o feedback precisa ser imediato.
           const ws = global.workspace_manager.get_workspace_by_index(workspace);
           if (ws)
             ws.activate(global.get_current_time());
@@ -249,10 +236,9 @@ let
     '';
   };
 
-  # Scripts dos customs "troca de área + foca/abre" (Super+k → kangen,
-  # Super+i → t3 code). Um writeShellApplication por app, gerados da mesma
-  # receita: o que muda é o id do .desktop, a área e o padrão de processo do
-  # fallback.
+  # Scripts dos customs "troca de área + foca/abre" (Super+k → kangen). Um
+  # writeShellApplication por app, gerados da mesma receita: o que muda é o id
+  # do .desktop, a área e o padrão de processo do fallback.
   #
   # ⚠️ Precisa ser um script (e não one-liner): o gsd-media-keys executa o
   # `command` do custom binding SEM shell (split de argv via
@@ -267,7 +253,7 @@ let
   #    app (dedup por pgrep).
   #
   # `processPattern` é regex do pgrep -f: ancore o final (`$`) para não casar
-  # com processo filho (o Electron do t3 code, por exemplo, roda zygotes
+  # com processo filho (o Electron de um app, por exemplo, roda zygotes
   # com outro argv).
   focusAppOpen =
     {
@@ -318,18 +304,6 @@ let
     processHint = "kangen-desktop";
   };
 
-  # Super+i: czede na 1ª área, mesmo caso do kangen (AppImage de Electron).
-  # O padrão casa `t3code --no-sandbox` — nome do binário interno do AppImage
-  # (o .desktop executa com `env T3CODE_DISABLE_AUTO_UPDATE=1` na frente,
-  # então o argv final continua sendo `t3code --no-sandbox`).
-  t3Open = focusAppOpen {
-    name = "t3-open";
-    appId = "czede.desktop";
-    workspace = 0; # 1ª área
-    processPattern = "t3code --no-sandbox$";
-    processHint = "t3code --no-sandbox";
-  };
-
   # Jogos da Steam fixados numa área de trabalho.
   #
   # O auto-move-windows casa por id de .desktop (Shell.AppSystem.lookup_app),
@@ -372,14 +346,13 @@ in
 {
   # O appfinder do Super+a vinha do desktopManager.xfce (removido do repo) —
   # agora é instalado direto. O Papirus é o icon-theme do GNOME (abaixo).
-  # O kangenOpen e o t3Open são os scripts do Super+k e do Super+i (troca de
-  # área + foca/abre via a extensão app-focus); entram no profile para ficar no
-  # PATH da sessão do GNOME Shell.
+  # O kangenOpen é o script do Super+k (troca de área + foca/abre via a
+  # extensão app-focus); entra no profile para ficar no PATH da sessão do
+  # GNOME Shell.
   home.packages = [
     pkgs.xfce4-appfinder
     pkgs.papirus-icon-theme
     kangenOpen
-    t3Open
   ];
 
   # .desktop dos jogos da Steam (ver o comentário em steamGames acima) e da
@@ -474,8 +447,8 @@ in
         "appindicatorsupport@rgcjonas.gmail.com"
         "auto-move-windows@gnome-shell-extensions.gcampax.github.com"
         "dash-to-dock@micxgx.gmail.com"
-        # Foca/abre apps pelo D-Bus da sessão — os Super+k/Super+i usam para o
-        # kangen e o t3 code (ver focusAppOpen no let).
+        # Foca/abre apps pelo D-Bus da sessão — o Super+k usa para o kangen
+        # (ver focusAppOpen no let).
         "app-focus@lafco.dev"
       ];
 
@@ -519,13 +492,9 @@ in
     # aviso no topo do arquivo); para pegar o de uma janela aberta:
     #   DISPLAY=:0 XAUTHORITY=~/.mutter-Xwaylandauth.* xprop -id <id> WM_CLASS
     # Jogos da Steam entram via gameAutoMove (ver steamGames no let).
-    #
-    # O czede fica na área 1 (junto do herdr): é a área do Super+i e
-    # garante que abrir pelo dock/menu/link caia no mesmo lugar do binding.
     "org/gnome/shell/extensions/auto-move-windows" = {
       application-list = [
         "herdr-app.desktop:1"
-        "czede.desktop:1"
         "firefox.desktop:2"
         "steam.desktop:3"
         "ankama-launcher.desktop:3"

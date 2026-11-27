@@ -1,4 +1,4 @@
-# Apps de desktop: Firefox (declarativo) + 1Password + Fastmail + IDEs (Zed, T3 Code)
+# Apps de desktop: Firefox (declarativo) + 1Password + Fastmail + IDEs (Zed)
 # Firefox: extensões e preferências versionadas; login/sync continua manual (1x).
 # 1Password: GUI e CLI vêm dos módulos do NixOS (programs._1password e
 # _1password-gui, em modules/nixos/desktop.nix) — aqui ficam a extensão do
@@ -125,9 +125,12 @@ in
     # NÃO usar pkgs.zed: esse é o CLI do data lake da Brim Data
     # (zed.brimdata.io), não o editor do zed.dev — e é por isso que o binário
     # do editor se chama `zeditor` no nixpkgs.
-    # czede: nosso fork do T3 Code, app desktop para coding agents (Electron,
-    # AppImage do release do repo lafco/czede) — ver pkgs/t3code.nix.
-    t3code
+    # Zathura: o viewer de PDF (e ebook/quadrinho: os plugins djvu, cb e ps vêm
+    # no pacote). O nixpkgs daqui builds com o plugin mupdf (useMupdf ? true em
+    # pkgs/applications/misc/zathura/default.nix), o mesmo motor do llpp. O
+    # default de application/pdf fica em modules/nixos/desktop.nix, junto da
+    # remoção do org.gnome.Papers.
+    zathura
     # O updater interno é desativado pelo overlay: o AppImage fica imutável no
     # /nix/store e novas versões são aplicadas pelo flake/Nix.
     ankama-launcher # jogos Ankama (Dofus, Waven, Wakfu…) — AppImage + wine
@@ -154,16 +157,6 @@ in
     # vai no favorite-apps/auto-move-windows de home/modules/gnome.nix.
     discord
   ];
-
-  # Ícone do T3 Code no GNOME: o pacote instala o .png em share/icons/hicolor,
-  # mas o home-manager não gera o icon-theme.cache do hicolor no profile — e o
-  # GNOME às vezes não resolve ícones de pacote sem o cache (fica o ícone
-  # genérico). Copiar para ~/.local/share/icons (XDG_DATA_HOME, sempre varrido)
-  # garante que o app apareça com ícone no grid/dock.
-  # O arquivo dentro do AppImage continua t3code.png (vem do executableName do
-  # electron-builder); o nome visível vem do .desktop (Name=czede).
-  xdg.dataFile."icons/hicolor/512x512/apps/t3code.png".source =
-    "${pkgs.t3code}/share/icons/hicolor/512x512/apps/t3code.png";
 
   # Native messaging do 1Password: arquivo no diretório que o Firefox lê.
   #
